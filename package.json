@@ -4,25 +4,29 @@
 	"version": "0.0.1",
 	"private": false,
 	"description": "Support for connecting to Jupyter Hub in VS Code along with the Jupyter Extension",
-	"homepage": "https://github.com/CodeEditorLand/Foundation#readme",
+	"keywords": [
+		"land"
+	],
+	"homepage": "HTTPS://GitHub.Com/CodeEditorLand/LandJupyterHub#readme",
 	"bugs": {
-		"url": "https://github.com/CodeEditorLand/Foundation/issues"
+		"url": "HTTPS://GitHub.Com/CodeEditorLand/LandJupyterHub/issues"
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/CodeEditorLand/Foundation.git"
+		"url": "git+HTTPS://github.com/CodeEditorLand/LandJupyterHub.git"
 	},
 	"license": "SEE LICENSE IN LICENSE",
 	"qna": "https://github.com/microsoft/vscode-jupyter/discussions",
 	"author": {
-		"name": "Playform",
-		"email": "Hello@Playform.Cloud",
-		"url": "https://playform.cloud"
+		"name": "🌆 — Land —",
+		"email": "Land@PlayForm.Cloud",
+		"url": "HTTPS://Land.PlayForm.Cloud"
 	},
 	"type": "module",
 	"main": "./dist/extension.node.js",
 	"browser": "./dist/extension.web.js",
 	"scripts": {
+		"Document": "Document 'Source/**/*.ts'",
 		"compile": "npm run esbuild",
 		"esbuild": "npm run esbuild-base-node -- --sourcemap && npm run esbuild-base-web -- --sourcemap",
 		"esbuild-base-node": "esbuild ./src/extension.node.ts --bundle --outfile=dist/extension.node.js --external:vscode --external:node:crypto --format=cjs --platform=node",
@@ -31,11 +35,9 @@
 		"esbuild-release": "npm run esbuild-base-node && npm run esbuild-base-web",
 		"esbuild-test-web": "esbuild ./src/test/suite/index.web.ts --bundle --outfile=dist/test.index.web.js --external:vscode --external:node:crypto --format=cjs --target=es2018 --define:global=this --alias:stream=stream-browserify",
 		"esbuild-web-watch": "npm run esbuild-base-web -- --sourcemap --watch",
-		"postinstall": "npx vscode-dts 1.82.0",
 		"make-extension-pack-for-web-tests": "node ./build/makeExtensionPack.js",
 		"open-in-browser": "vscode-test-web --extensionDevelopmentPath=. ./tmp",
-		"package": "npm run esbuild-release && vsce package -o ms-toolsai-jupyter-hub-insiders.vsix",
-		"prepublishOnly": "TypeScriptESBuild 'Source/**/*.ts'",
+		"prepublishOnly": "Build 'Source/**/*.ts'",
 		"test-compile": "tsc -p ./",
 		"test-compile-watch": "tsc -p ./ --watch",
 		"test-compile-webpack": "webpack",
@@ -68,41 +70,37 @@
 		"onNotebook:interactive"
 	],
 	"dependencies": {
-		"@jupyterlab/services": "^7.0.5",
-		"@vscode/extension-telemetry": "^0.7.7",
-		"buffer": "^6.0.3",
-		"events": "^3.3.0",
-		"node-fetch": "^2.6.7",
-		"process": "^0.11.10",
-		"stream-browserify": "^3.0.0",
-		"util": "^0.12.5"
+		"@jupyterlab/services": "7.1.8",
+		"buffer": "6.0.3",
+		"events": "3.3.0",
+		"isomorphic-ws": "5.0.0",
+		"node-fetch": "3.3.2",
+		"process": "0.11.10",
+		"stream-browserify": "3.0.0",
+		"util": "0.12.5"
 	},
 	"devDependencies": {
-		"@types/chai": "^4.3.6",
-		"@types/mocha": "^9.1.1",
-		"@types/node": "^16.18.6",
-		"@types/node-fetch": "^2.5.7",
-		"@types/react": "^18.2.21",
-		"@types/webpack-env": "^1.18.1",
-		"@types/ws": "^6.0.4",
-		"@vscode/dts": "^0.4.0",
-		"@vscode/jupyter-extension": "^0.0.7",
-		"@vscode/test-electron": "^2.3.4",
-		"@vscode/test-web": "^0.0.29",
-		"chai": "^4.3.8",
-		"esbuild": "^0.19.2",
-		"glob": "^10.3.4",
-		"isomorphic-ws": "^5.0.0",
-		"mocha": "^10.2.0",
-		"ts-loader": "^9.4.4",
-		"typescript": "^5.2.2",
-		"typescript-esbuild": "0.4.5",
-		"webpack": "^5.88.2",
-		"webpack-cli": "^5.1.4",
-		"ws": "^8.14.1"
+		"@playform/build": "0.0.7",
+		"@playform/document": "0.0.6",
+		"@types/chai": "4.3.14",
+		"@types/chai-as-promised": "7.1.8",
+		"@types/node": "20.12.7",
+		"@types/node-fetch": "2.6.11",
+		"@types/sinon": "17.0.3",
+		"@types/ws": "8.5.10",
+		"assert": "2.1.0",
+		"chai": "5.1.0",
+		"chai-as-promised": "7.1.1",
+		"esbuild": "0.20.2",
+		"glob": "10.3.12",
+		"sinon": "17.0.1",
+		"timers-browserify": "2.0.12",
+		"ts-loader": "9.5.1",
+		"ts-mockito": "2.6.1",
+		"ws": "8.17.0"
 	},
 	"optionalDependencies": {
-		"fsevents": "^2.3.2"
+		"fsevents": "2.3.3"
 	},
 	"extensionDependencies": [
 		"ms-toolsai.jupyter"
