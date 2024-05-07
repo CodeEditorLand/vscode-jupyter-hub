@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-/** @typedef {import('webpack').Configuration} WebpackConfig **/
+
 
 const path = require('path');
 const webpack = require('webpack');
 const tsconfig_paths_webpack_plugin = require('tsconfig-paths-webpack-plugin');
 
-/** @type WebpackConfig */
+
 const webExtensionConfig = {
     mode: 'none', // this leaves the source code as close as possible to the original (when packaging we set this to 'production')
     target: 'webworker', // extensions run in a webworker context
