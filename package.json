@@ -73,7 +73,7 @@
 		"timers-browserify": "^2.0.12",
 		"ts-loader": "^9.5.1",
 		"ts-mockito": "^2.6.1",
-		"ws": "^8.17.0"
+		"ws": "^8.17.1"
 	},
 	"optionalDependencies": {
 		"fsevents": "^2.3.3"
