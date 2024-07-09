@@ -17,7 +17,7 @@ else if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGloba
     cryptoProvider = self.crypto;
 } else {
     // Node
-    cryptoProvider = require('node:crypto').webcrypto;
+    cryptoProvider = require('crypto').webcrypto;
 }
 
 /**
