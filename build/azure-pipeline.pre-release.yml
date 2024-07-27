@@ -5,53 +5,53 @@ pr: none
 name: $(Date:yyyyMMdd)_$(Hours)_$(Minutes)_$(Rev:r)
 
 schedules:
-  - cron: '0 9 * * 1-5' # 9am UTC, Monday-Friday (2am PDT, after VS Code pre-release builds which is 11pm PDT)
-    displayName: Nightly Release Schedule
-    branches:
-      include:
-        - main
+    - cron: "0 9 * * 1-5" # 9am UTC, Monday-Friday (2am PDT, after VS Code pre-release builds which is 11pm PDT)
+      displayName: Nightly Release Schedule
+      branches:
+          include:
+              - main
 
 resources:
-  repositories:
-    - repository: templates
-      type: github
-      name: microsoft/vscode-engineering
-      ref: main
-      endpoint: Monaco
+    repositories:
+        - repository: templates
+          type: github
+          name: microsoft/vscode-engineering
+          ref: main
+          endpoint: Monaco
 
 parameters:
-  - name: publishExtension
-    displayName: 🚀 Publish Extension
-    type: boolean
-    default: false
+    - name: publishExtension
+      displayName: 🚀 Publish Extension
+      type: boolean
+      default: false
 
 extends:
-  template: azure-pipelines/extension/pre-release.yml@templates
-  parameters:
-    ghCreateTag: false
-    l10nSourcePaths: ./src
-    buildPlatforms:
-      - name: Linux
-        vsceTarget: ''
-    buildSteps:
-      - script: npm i -g npm@8.15.1
-        displayName: npm 8.15.1
+    template: azure-pipelines/extension/pre-release.yml@templates
+    parameters:
+        ghCreateTag: false
+        l10nSourcePaths: ./src
+        buildPlatforms:
+            - name: Linux
+              vsceTarget: ""
+        buildSteps:
+            - script: npm i -g npm@8.15.1
+              displayName: npm 8.15.1
 
-      - script: npm ci
-        displayName: npm ci
+            - script: npm ci
+              displayName: npm ci
 
-      - script: npm run updateBuildNumber
-        displayName: Update build number
-        env:
-          VSC_BUILD_ID: $(Build.BuildNumber)
+            - script: npm run updateBuildNumber
+              displayName: Update build number
+              env:
+                  VSC_BUILD_ID: $(Build.BuildNumber)
 
-      - script: npm run esbuild-release
-        displayName: Build
+            - script: npm run esbuild-release
+              displayName: Build
 
-    tsa:
-        config:
-            areaPath: 'Visual Studio Code Jupyter Extensions'
-            serviceTreeID: '14f24efd-b502-422a-9f40-09ea7ce9cf14'
-        enabled: true
+        tsa:
+            config:
+                areaPath: "Visual Studio Code Jupyter Extensions"
+                serviceTreeID: "14f24efd-b502-422a-9f40-09ea7ce9cf14"
+            enabled: true
 
-    publishExtension: ${{ parameters.publishExtension }}
+        publishExtension: ${{ parameters.publishExtension }}
