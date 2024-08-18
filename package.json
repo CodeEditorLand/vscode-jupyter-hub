@@ -31,33 +31,33 @@
 		}
 	},
 	"dependencies": {
-		"@jupyterlab/services": "^7.3.0-alpha.2",
-		"buffer": "^6.0.3",
-		"events": "^3.3.0",
-		"isomorphic-ws": "^5.0.0",
-		"node-fetch": "^4.0.0-beta.4",
-		"process": "^0.11.10",
-		"stream-browserify": "^3.0.0",
-		"util": "^0.12.5"
+		"@jupyterlab/services": "7.3.0-beta.0",
+		"buffer": "6.0.3",
+		"events": "3.3.0",
+		"isomorphic-ws": "5.0.0",
+		"node-fetch": "4.0.0-beta.4",
+		"process": "0.11.10",
+		"stream-browserify": "3.0.0",
+		"util": "0.12.5"
 	},
 	"description": "Support for connecting to Jupyter Hub in VS Code along with the Jupyter Extension",
 	"devDependencies": {
-		"@types/chai": "^4.3.17",
-		"@types/chai-as-promised": "^7.1.8",
-		"@types/node": "^22.1.0",
-		"@types/node-fetch": "^3.0.3",
-		"@types/sinon": "^17.0.3",
-		"@types/ws": "^8.5.12",
-		"assert": "^2.1.0",
-		"chai": "^5.1.1",
-		"chai-as-promised": "^8.0.0",
-		"esbuild": "^0.23.0",
-		"glob": "^11.0.0",
-		"sinon": "^18.0.0",
-		"timers-browserify": "^2.0.12",
-		"ts-loader": "^9.5.1",
-		"ts-mockito": "^2.6.1",
-		"ws": "^8.18.0"
+		"@types/chai": "4.3.17",
+		"@types/chai-as-promised": "7.1.8",
+		"@types/node": "22.4.0",
+		"@types/node-fetch": "3.0.3",
+		"@types/sinon": "17.0.3",
+		"@types/ws": "8.5.12",
+		"assert": "2.1.0",
+		"chai": "5.1.1",
+		"chai-as-promised": "8.0.0",
+		"esbuild": "0.23.1",
+		"glob": "11.0.0",
+		"sinon": "18.0.0",
+		"timers-browserify": "2.0.12",
+		"ts-loader": "9.5.1",
+		"ts-mockito": "2.6.1",
+		"ws": "8.18.0"
 	},
 	"devDependenciesComments": {
 		"@types/react": "Added to ensure @lumino compiles, @lumino is a dependency of Jupyter Lab npm"
@@ -75,7 +75,7 @@
 	"main": "./dist/extension.node.js",
 	"name": "jupyter-hub",
 	"optionalDependencies": {
-		"fsevents": "^2.3.3"
+		"fsevents": "2.3.3"
 	},
 	"preview": true,
 	"qna": "https://github.com/microsoft/vscode-jupyter/discussions",
