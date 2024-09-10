@@ -1,0 +1,53 @@
+{
+    "version": "2.0.0",
+    "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+    },
+    "tasks": [
+        {
+            "label": "Compile",
+            "type": "npm",
+            "script": "esbuild",
+            "isBackground": true,
+            "problemMatcher": ["$tsc-watch"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Compile Web Extension",
+            "type": "npm",
+            "script": "esbuild-web-watch",
+            "isBackground": true,
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Compile Desktop Extension",
+            "type": "npm",
+            "script": "esbuild-node-watch",
+            "isBackground": true,
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Compile TS No Watch",
+            "type": "npm",
+            "script": "test-compile"
+        },
+        {
+            "label": "Compile Web Tests No watch",
+            "type": "npm",
+            "script": "test-compile-webpack",
+            "dependsOn": ["Compile TS No Watch"]
+        }
+    ]
+}
