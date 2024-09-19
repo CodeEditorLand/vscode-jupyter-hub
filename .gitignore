@@ -54,6 +54,7 @@ src/test/datascience/.venv*
 !src/test/pythonEnvironments/**/*.*
 .vscode-test-web
 .github_token
+# translation files
 *.xlf
 *.nls.*.json
 *.i18n.json
