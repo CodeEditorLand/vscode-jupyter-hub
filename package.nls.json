@@ -1,4 +1,4 @@
 {
-    "capabilities.untrustedWorkspace.description": "Execution of cells in Interactive Window and Notebooks is not supported in untrusted workspaces.",
-    "jupyterHub.configuration.jupyterHub.log.description": "The logging level the extension logs at."
+	"capabilities.untrustedWorkspace.description": "Execution of cells in Interactive Window and Notebooks is not supported in untrusted workspaces.",
+	"jupyterHub.configuration.jupyterHub.log.description": "The logging level the extension logs at."
 }
