@@ -1,38 +1,84 @@
 {
-	"name": "jupyter-hub",
-	"displayName": "JupyterHub",
-	"version": "2024.10.100",
-	"description": "Support for connecting to Jupyter Hub in VS Code along with the Jupyter Extension",
-	"categories": [
-		"Data Science",
-		"Machine Learning",
-		"Notebooks"
+	"activationEvents": [
+		"onNotebook:jupyter-notebook",
+		"onNotebook:interactive"
 	],
-	"keywords": [
-		"jupyter",
-		"jupyterhub",
-		"notebook",
-		"notebookKernelJupyterNotebook",
-		"multi-root ready",
-		"python",
-		"interactive"
-	],
-	"homepage": "https://github.com/Microsoft/vscode-jupyter-hub",
-	"bugs": {
-		"url": "https://github.com/Microsoft/vscode-jupyter-hub/issues"
-	},
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/Microsoft/vscode-jupyter-hub"
-	},
-	"license": "MIT",
-	"qna": "https://github.com/microsoft/vscode-jupyter/discussions",
-	"author": {
-		"name": "Microsoft Corporation"
-	},
-	"publisher": "ms-toolsai",
-	"main": "./dist/extension.node.js",
 	"browser": "./dist/extension.web.js",
+	"capabilities": {
+		"untrustedWorkspaces": {
+			"description": "%capabilities.untrustedWorkspace.description%",
+			"supported": "limited"
+		},
+		"virtualWorkspaces": true
+	},
+	"contributes": {
+		"configuration": {
+			"properties": {
+				"jupyterhub.log": {
+					"default": "error",
+					"description": "%jupyterHub.configuration.jupyterHub.log.description%",
+					"enum": [
+						"off",
+						"error",
+						"warn",
+						"debug"
+					],
+					"type": "string"
+				}
+			},
+			"title": "JupyterHub",
+			"type": "object"
+		}
+	},
+	"dependencies": {
+		"@jupyterlab/services": "^7.2.5",
+		"buffer": "^6.0.3",
+		"events": "^3.3.0",
+		"isomorphic-ws": "^5.0.0",
+		"node-fetch": "^3.3.2",
+		"process": "^0.11.10",
+		"stream-browserify": "^3.0.0",
+		"util": "^0.12.5"
+	},
+	"description": "Support for connecting to Jupyter Hub in VS Code along with the Jupyter Extension",
+	"devDependencies": {
+		"@types/chai": "^5.0.0",
+		"@types/chai-as-promised": "^8.0.1",
+		"@types/node": "^22.7.5",
+		"@types/node-fetch": "^2.6.11",
+		"@types/sinon": "^17.0.3",
+		"@types/ws": "^8.5.12",
+		"assert": "^2.1.0",
+		"chai": "^5.1.1",
+		"chai-as-promised": "^8.0.0",
+		"esbuild": "^0.24.0",
+		"glob": "^11.0.0",
+		"sinon": "^19.0.2",
+		"timers-browserify": "^2.0.12",
+		"ts-loader": "^9.5.1",
+		"ts-mockito": "^2.6.1",
+		"ws": "^8.18.0"
+	},
+	"devDependenciesComments": {
+		"@types/react": "Added to ensure @lumino compiles, @lumino is a dependency of Jupyter Lab npm"
+	},
+	"displayName": "JupyterHub",
+	"extensionDependencies": [
+		"ms-toolsai.jupyter"
+	],
+	"galleryBanner": {
+		"color": "#ffffff",
+		"theme": "light"
+	},
+	"icon": "icon.png",
+	"l10n": "./l10n",
+	"main": "./dist/extension.node.js",
+	"name": "jupyter-hub",
+	"optionalDependencies": {
+		"fsevents": "^2.3.3"
+	},
+	"preview": true,
+	"qna": "https://github.com/microsoft/vscode-jupyter/discussions",
 	"scripts": {
 		"compile": "npm run esbuild",
 		"esbuild": "npm run esbuild-base-node -- --sourcemap && npm run esbuild-base-web -- --sourcemap",
@@ -42,13 +88,8 @@
 		"esbuild-release": "npm run esbuild-base-node && npm run esbuild-base-web",
 		"esbuild-test-web": "esbuild ./src/test/suite/index.web.ts --bundle --outfile=dist/test.index.web.js --external:vscode --external:node:crypto --format=cjs --target=es2018 --define:global=this --alias:stream=stream-browserify",
 		"esbuild-web-watch": "npm run esbuild-base-web -- --sourcemap --watch",
-		"postinstall": "npx vscode-dts 1.82.0",
-		"lint": "eslint -c .eslintrc.js --ext .ts --ext .tsx src",
 		"make-extension-pack-for-web-tests": "node ./build/makeExtensionPack.js",
 		"open-in-browser": "vscode-test-web --extensionDevelopmentPath=. ./tmp",
-		"package": "npm run esbuild-release && vsce package -o ms-toolsai-jupyter-hub-insiders.vsix",
-		"prettier-fix": "prettier 'src/**/*.ts*' --write && prettier 'build/**/*.js' --write",
-		"test": "node ./out/test/runTest.js",
 		"test-compile": "tsc -p ./",
 		"test-compile-watch": "tsc -p ./ --watch",
 		"test-compile-webpack": "webpack",
@@ -57,109 +98,5 @@
 		"test:web": "vscode-test-web --quality=insiders --browserType=chromium --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/test.index.web.js ./tmp",
 		"test:web:ci": "node ./out/test/runTest.web.js",
 		"updateBuildNumber": "node ./build/updateBuildNumber.js"
-	},
-	"contributes": {
-		"configuration": {
-			"type": "object",
-			"title": "JupyterHub",
-			"properties": {
-				"jupyterhub.log": {
-					"type": "string",
-					"default": "error",
-					"enum": [
-						"off",
-						"error",
-						"warn",
-						"debug"
-					],
-					"description": "%jupyterHub.configuration.jupyterHub.log.description%"
-				}
-			}
-		}
-	},
-	"activationEvents": [
-		"onNotebook:jupyter-notebook",
-		"onNotebook:interactive"
-	],
-	"dependencies": {
-		"@jupyterlab/services": "^7.2.5",
-		"@vscode/extension-telemetry": "^0.9.7",
-		"buffer": "^6.0.3",
-		"events": "^3.3.0",
-		"isomorphic-ws": "^5.0.0",
-		"node-fetch": "^3.3.2",
-		"process": "^0.11.10",
-		"stream-browserify": "^3.0.0",
-		"util": "^0.12.5"
-	},
-	"devDependencies": {
-		"@types/chai": "^5.0.0",
-		"@types/chai-as-promised": "^8.0.1",
-		"@types/mocha": "^10.0.9",
-		"@types/node": "^22.7.5",
-		"@types/node-fetch": "^2.6.11",
-		"@types/react": "^18.3.11",
-		"@types/sinon": "^17.0.3",
-		"@types/webpack-env": "^1.18.5",
-		"@types/ws": "^8.5.12",
-		"@typescript-eslint/eslint-plugin": "^8.8.1",
-		"@typescript-eslint/eslint-plugin-tslint": "^7.0.2",
-		"@typescript-eslint/parser": "^8.8.1",
-		"@vscode/dts": "^0.4.1",
-		"@vscode/jupyter-extension": "^1.1.1",
-		"@vscode/test-electron": "^2.4.1",
-		"@vscode/test-web": "^0.0.62",
-		"assert": "^2.1.0",
-		"chai": "^5.1.1",
-		"chai-as-promised": "^8.0.0",
-		"esbuild": "^0.24.0",
-		"eslint": "^9.12.0",
-		"eslint-config-airbnb": "^19.0.4",
-		"eslint-config-prettier": "^9.1.0",
-		"eslint-plugin-header": "^3.1.1",
-		"eslint-plugin-import": "^2.31.0",
-		"eslint-plugin-jsdoc": "^50.3.1",
-		"eslint-plugin-no-null": "^1.0.2",
-		"eslint-plugin-no-only-tests": "^3.3.0",
-		"eslint-plugin-prefer-arrow": "^1.2.3",
-		"eslint-plugin-prettier": "^5.2.1",
-		"glob": "^11.0.0",
-		"mocha": "^10.7.3",
-		"prettier": "^3.3.3",
-		"sinon": "^19.0.2",
-		"timers-browserify": "^2.0.12",
-		"ts-loader": "^9.5.1",
-		"ts-mockito": "^2.6.1",
-		"tsconfig-paths-webpack-plugin": "^4.1.0",
-		"typescript": "^5.6.3",
-		"webpack": "^5.95.0",
-		"webpack-cli": "^5.1.4",
-		"ws": "^8.18.0"
-	},
-	"optionalDependencies": {
-		"fsevents": "^2.3.3"
-	},
-	"extensionDependencies": [
-		"ms-toolsai.jupyter"
-	],
-	"engines": {
-		"vscode": "^1.83.0"
-	},
-	"icon": "icon.png",
-	"galleryBanner": {
-		"color": "#ffffff",
-		"theme": "light"
-	},
-	"preview": true,
-	"capabilities": {
-		"virtualWorkspaces": true,
-		"untrustedWorkspaces": {
-			"supported": "limited",
-			"description": "%capabilities.untrustedWorkspace.description%"
-		}
-	},
-	"devDependenciesComments": {
-		"@types/react": "Added to ensure @lumino compiles, @lumino is a dependency of Jupyter Lab npm"
-	},
-	"l10n": "./l10n"
+	}
 }
