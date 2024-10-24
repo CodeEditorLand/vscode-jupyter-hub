@@ -49,7 +49,7 @@
 		"@types/sinon": "17.0.3",
 		"@types/ws": "8.5.12",
 		"assert": "2.1.0",
-		"chai": "5.1.1",
+		"chai": "5.1.2",
 		"chai-as-promised": "8.0.0",
 		"esbuild": "0.24.0",
 		"glob": "11.0.0",
