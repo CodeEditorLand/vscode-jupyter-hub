@@ -42,9 +42,9 @@
 	},
 	"description": "Support for connecting to Jupyter Hub in VS Code along with the Jupyter Extension",
 	"devDependencies": {
-		"@types/chai": "5.0.0",
+		"@types/chai": "5.0.1",
 		"@types/chai-as-promised": "8.0.1",
-		"@types/node": "22.8.1",
+		"@types/node": "22.8.2",
 		"@types/node-fetch": "2.6.11",
 		"@types/sinon": "17.0.3",
 		"@types/ws": "8.5.12",
