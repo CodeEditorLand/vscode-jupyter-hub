@@ -31,7 +31,7 @@
 		}
 	},
 	"dependencies": {
-		"@jupyterlab/services": "7.2.5",
+		"@jupyterlab/services": "7.3.0",
 		"buffer": "6.0.3",
 		"events": "3.3.0",
 		"isomorphic-ws": "5.0.0",
@@ -44,7 +44,7 @@
 	"devDependencies": {
 		"@types/chai": "5.0.1",
 		"@types/chai-as-promised": "8.0.1",
-		"@types/node": "22.8.4",
+		"@types/node": "22.8.6",
 		"@types/node-fetch": "2.6.11",
 		"@types/sinon": "17.0.3",
 		"@types/ws": "8.5.12",
