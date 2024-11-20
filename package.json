@@ -1,29 +1,15 @@
 {
-	"name": "jupyter-hub",
-	"displayName": "JupyterHub",
-	"description": "Support for connecting to Jupyter Hub in VS Code along with the Jupyter Extension",
-	"qna": "https://github.com/microsoft/vscode-jupyter/discussions",
-	"main": "./dist/extension.node.js",
+	"activationEvents": [
+		"onNotebook:jupyter-notebook",
+		"onNotebook:interactive"
+	],
 	"browser": "./dist/extension.web.js",
-	"scripts": {
-		"compile": "npm run esbuild",
-		"esbuild": "npm run esbuild-base-node -- --sourcemap && npm run esbuild-base-web -- --sourcemap",
-		"esbuild-base-node": "esbuild ./src/extension.node.ts --bundle --outfile=dist/extension.node.js --external:vscode --external:node:crypto --format=cjs --platform=node",
-		"esbuild-base-web": "esbuild ./src/extension.web.ts --bundle --outfile=dist/extension.web.js --external:vscode --external:node:crypto --format=cjs --target=es2018 --define:global=this",
-		"esbuild-node-watch": "npm run esbuild-base-node -- --sourcemap --watch",
-		"esbuild-release": "npm run esbuild-base-node && npm run esbuild-base-web",
-		"esbuild-test-web": "esbuild ./src/test/suite/index.web.ts --bundle --outfile=dist/test.index.web.js --external:vscode --external:node:crypto --format=cjs --target=es2018 --define:global=this --alias:stream=stream-browserify",
-		"esbuild-web-watch": "npm run esbuild-base-web -- --sourcemap --watch",
-		"make-extension-pack-for-web-tests": "node ./build/makeExtensionPack.js",
-		"open-in-browser": "vscode-test-web --extensionDevelopmentPath=. ./tmp",
-		"test-compile": "tsc -p ./",
-		"test-compile-watch": "tsc -p ./ --watch",
-		"test-compile-webpack": "webpack",
-		"test-compile-webpack-watch": "webpack --watch",
-		"test:unittests": "mocha --config ./build/.mocha.unittests.js.json ./out/**/*.unit.test.js",
-		"test:web": "vscode-test-web --quality=insiders --browserType=chromium --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/test.index.web.js ./tmp",
-		"test:web:ci": "node ./out/test/runTest.web.js",
-		"updateBuildNumber": "node ./build/updateBuildNumber.js"
+	"capabilities": {
+		"untrustedWorkspaces": {
+			"description": "%capabilities.untrustedWorkspace.description%",
+			"supported": "limited"
+		},
+		"virtualWorkspaces": true
 	},
 	"contributes": {
 		"configuration": {
@@ -44,10 +30,6 @@
 			"type": "object"
 		}
 	},
-	"activationEvents": [
-		"onNotebook:jupyter-notebook",
-		"onNotebook:interactive"
-	],
 	"dependencies": {
 		"@jupyterlab/services": "7.3.1",
 		"buffer": "6.0.3",
@@ -58,6 +40,7 @@
 		"stream-browserify": "3.0.0",
 		"util": "0.12.5"
 	},
+	"description": "Support for connecting to Jupyter Hub in VS Code along with the Jupyter Extension",
 	"devDependencies": {
 		"@types/chai": "5.0.1",
 		"@types/chai-as-promised": "8.0.1",
@@ -76,27 +59,44 @@
 		"ts-mockito": "2.6.1",
 		"ws": "8.18.0"
 	},
-	"optionalDependencies": {
-		"fsevents": "2.3.3"
+	"devDependenciesComments": {
+		"@types/react": "Added to ensure @lumino compiles, @lumino is a dependency of Jupyter Lab npm"
 	},
+	"displayName": "JupyterHub",
 	"extensionDependencies": [
 		"ms-toolsai.jupyter"
 	],
-	"icon": "icon.png",
 	"galleryBanner": {
 		"color": "#ffffff",
 		"theme": "light"
 	},
+	"icon": "icon.png",
+	"l10n": "./l10n",
+	"main": "./dist/extension.node.js",
+	"name": "jupyter-hub",
+	"optionalDependencies": {
+		"fsevents": "2.3.3"
+	},
 	"preview": true,
-	"capabilities": {
-		"untrustedWorkspaces": {
-			"description": "%capabilities.untrustedWorkspace.description%",
-			"supported": "limited"
-		},
-		"virtualWorkspaces": true
-	},
-	"devDependenciesComments": {
-		"@types/react": "Added to ensure @lumino compiles, @lumino is a dependency of Jupyter Lab npm"
-	},
-	"l10n": "./l10n"
+	"qna": "https://github.com/microsoft/vscode-jupyter/discussions",
+	"scripts": {
+		"compile": "npm run esbuild",
+		"esbuild": "npm run esbuild-base-node -- --sourcemap && npm run esbuild-base-web -- --sourcemap",
+		"esbuild-base-node": "esbuild ./src/extension.node.ts --bundle --outfile=dist/extension.node.js --external:vscode --external:node:crypto --format=cjs --platform=node",
+		"esbuild-base-web": "esbuild ./src/extension.web.ts --bundle --outfile=dist/extension.web.js --external:vscode --external:node:crypto --format=cjs --target=es2018 --define:global=this",
+		"esbuild-node-watch": "npm run esbuild-base-node -- --sourcemap --watch",
+		"esbuild-release": "npm run esbuild-base-node && npm run esbuild-base-web",
+		"esbuild-test-web": "esbuild ./src/test/suite/index.web.ts --bundle --outfile=dist/test.index.web.js --external:vscode --external:node:crypto --format=cjs --target=es2018 --define:global=this --alias:stream=stream-browserify",
+		"esbuild-web-watch": "npm run esbuild-base-web -- --sourcemap --watch",
+		"make-extension-pack-for-web-tests": "node ./build/makeExtensionPack.js",
+		"open-in-browser": "vscode-test-web --extensionDevelopmentPath=. ./tmp",
+		"test-compile": "tsc -p ./",
+		"test-compile-watch": "tsc -p ./ --watch",
+		"test-compile-webpack": "webpack",
+		"test-compile-webpack-watch": "webpack --watch",
+		"test:unittests": "mocha --config ./build/.mocha.unittests.js.json ./out/**/*.unit.test.js",
+		"test:web": "vscode-test-web --quality=insiders --browserType=chromium --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/test.index.web.js ./tmp",
+		"test:web:ci": "node ./out/test/runTest.web.js",
+		"updateBuildNumber": "node ./build/updateBuildNumber.js"
+	}
 }
