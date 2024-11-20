@@ -44,7 +44,7 @@
 	"devDependencies": {
 		"@types/chai": "5.0.1",
 		"@types/chai-as-promised": "8.0.1",
-		"@types/node": "22.9.0",
+		"@types/node": "22.9.1",
 		"@types/node-fetch": "2.6.12",
 		"@types/sinon": "17.0.3",
 		"@types/ws": "8.5.13",
