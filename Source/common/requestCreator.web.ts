@@ -17,6 +17,7 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 
 				if (getAuthHeaders) {
 					const authorizationHeader = getAuthHeaders();
+
 					const keys = Object.keys(authorizationHeader);
 					keys.forEach((k) =>
 						origHeaders.append(

@@ -53,6 +53,7 @@ export class JupyterServerIntegration
 	private previouslyEnteredUrlTypedIntoQuickPick?: string;
 	private previouslyEnteredJupyterServerBasedOnUrlTypedIntoQuickPick?: JupyterServer;
 	private readonly jupyterConnectionValidator: IJupyterHubConnectionValidator;
+
 	constructor(
 		private readonly fetch: SimpleFetch,
 		private readonly jupyterApi: Jupyter,
@@ -64,6 +65,7 @@ export class JupyterServerIntegration
 			fetch,
 		);
 		this.newAuthenticator = new Authenticator(fetch);
+
 		const collection = this.jupyterApi.createJupyterServerCollection(
 			this.id,
 			Localized.KernelActionSourceTitle,
@@ -88,9 +90,12 @@ export class JupyterServerIntegration
 			// When we provide a url we skip the url capture input box, but when we come here from the
 			// back button then we need to re-display the url capture input box.
 			let displayName: string | undefined = undefined;
+
 			let serverId: string | undefined = undefined;
+
 			let whyCaptureUrl: "cameHereFromBackButton" | "captureNewUrl" =
 				"captureNewUrl";
+
 			if (
 				url &&
 				this.previouslyEnteredUrlTypedIntoQuickPick === url &&
@@ -114,15 +119,18 @@ export class JupyterServerIntegration
 				serverId,
 				whyCaptureUrl,
 			);
+
 			if (!server) {
 				this.previouslyEnteredJupyterServerBasedOnUrlTypedIntoQuickPick =
 					undefined;
 				this.previouslyEnteredUrlTypedIntoQuickPick = undefined;
+
 				return;
 			}
 			this._onDidChangeServers.fire();
 			this.previouslyEnteredJupyterServerBasedOnUrlTypedIntoQuickPick =
 				server;
+
 			return server;
 		} catch (ex) {
 			if (!(ex instanceof CancellationError)) {
@@ -131,6 +139,7 @@ export class JupyterServerIntegration
 			this.previouslyEnteredUrlTypedIntoQuickPick = undefined;
 			this.previouslyEnteredJupyterServerBasedOnUrlTypedIntoQuickPick =
 				undefined;
+
 			throw ex;
 		}
 	}
@@ -144,9 +153,12 @@ export class JupyterServerIntegration
 		this.previouslyEnteredJupyterServerBasedOnUrlTypedIntoQuickPick =
 			undefined;
 		this.previouslyEnteredUrlTypedIntoQuickPick = undefined;
+
 		let url = "";
+
 		try {
 			value = (value || "").trim();
+
 			if (
 				["http:", "https:"].includes(
 					new URL(value.trim()).protocol.toLowerCase(),
@@ -159,7 +171,9 @@ export class JupyterServerIntegration
 		}
 		if (url) {
 			this.previouslyEnteredUrlTypedIntoQuickPick = url;
+
 			const label = Localized.connectToToTheJupyterServer(url);
+
 			return [{ label, url } as JupyterServerCommand];
 		}
 		return [
@@ -171,11 +185,14 @@ export class JupyterServerIntegration
 	}
 	async removeJupyterServer?(server: JupyterServer): Promise<void> {
 		const tokenSource = new CancellationTokenSource();
+
 		try {
 			const serverInfo = this.storage.all.find((s) => s.id === server.id);
+
 			const authInfo = await this.storage
 				.getCredentials(server.id)
 				.catch(noop);
+
 			if (serverInfo && authInfo?.token && authInfo.tokenId) {
 				// Delete the token that we created (we no longer need this).
 				await deleteApiToken(
@@ -231,13 +248,16 @@ export class JupyterServerIntegration
 		cancelToken: CancellationToken,
 	): Promise<JupyterServer> {
 		const serverInfo = this.storage.all.find((s) => s.id === server.id);
+
 		if (!serverInfo) {
 			throw new Error("Server not found");
 		}
 		traceDebug(
 			`Server Info for ${server.id} is ${JSON.stringify(serverInfo)}`,
 		);
+
 		const authInfo = await this.storage.getCredentials(server.id);
+
 		if (!authInfo) {
 			throw new Error(`Server ${server.id} not found`);
 		}
@@ -316,12 +336,18 @@ export class JupyterServerIntegration
 		// https://github.com/microsoft/vscode-jupyter-hub/issues/53
 		const baseUrl = Uri.parse(rawBaseUrl);
 		traceDebug(`Resolved server ${server.id} to ${baseUrl.toString(true)}`);
+
 		const brokenUrl = new this.nodeFetchImpl.Request(baseUrl.toString(true))
 			.url;
+
 		const correctUrl = new this.nodeFetchImpl.Request(rawBaseUrl).url;
+
 		const brokenWsUrl = brokenUrl.replace("http", "ws");
+
 		const brokenWsUrl2 = baseUrl.toString(true).replace("http", "ws");
+
 		const correctWsUrl = correctUrl.replace("http", "ws");
+
 		const ourFetch = async (input: Request, init?: RequestInit) => {
 			const newUrl = input.url.replace(brokenUrl, correctUrl);
 			init = init || {
@@ -338,18 +364,22 @@ export class JupyterServerIntegration
 				referrerPolicy: input.referrerPolicy,
 				signal: input.signal,
 			};
+
 			const newInput = new this.nodeFetchImpl.Request(
 				newUrl,
 				init as any,
 			);
+
 			return this.nodeFetchImpl.default(newInput as any, init as any);
 		};
+
 		const headers = {
 			Authorization: `token ${result.token}`,
 		};
 
 		const addOurHeaders = (options?: any) => {
 			options = options || {};
+
 			return {
 				...options,
 				headers: {
@@ -381,6 +411,7 @@ export class JupyterServerIntegration
 		};
 		(connectionInformation as any).fetch = ourFetch;
 		(connectionInformation as any).WebSocket = OurWebSocket;
+
 		return {
 			...server,
 			connectionInformation,

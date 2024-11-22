@@ -17,16 +17,20 @@ import { getJupyterApi } from "./utils";
 export async function activate(context: ExtensionContext) {
 	trackInstallOfExtension();
 	context.subscriptions.push(disposableStore);
+
 	getJupyterApi()
 		.then((api) => {
 			const requestCreator = new JupyterRequestCreator();
+
 			const fetch = new SimpleFetch(requestCreator);
+
 			const storage = disposableStore.add(
 				new JupyterHubServerStorage(
 					context.secrets,
 					context.globalState,
 				),
 			);
+
 			const uriCapture = disposableStore.add(
 				new JupyterHubUrlCapture(fetch, storage),
 			);
@@ -40,6 +44,7 @@ export async function activate(context: ExtensionContext) {
 			);
 		})
 		.catch((ex) => traceError("Failed to activate jupyter extension", ex));
+
 	if (context.extensionMode === ExtensionMode.Test) {
 		return {
 			RequestCreator: JupyterRequestCreator,

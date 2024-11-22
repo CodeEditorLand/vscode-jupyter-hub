@@ -40,6 +40,7 @@ export class SimpleFetch {
 			);
 		} catch (e) {
 			traceError(`Error sending request to ${url}`, e);
+
 			if (e.message.indexOf("reason: self signed certificate") >= 0) {
 				// Ask user to change setting and possibly try again.
 				const value = await window.showErrorMessage(
@@ -48,6 +49,7 @@ export class SimpleFetch {
 					Localized.jupyterSelfCertEnable,
 					Localized.jupyterSelfCertClose,
 				);
+
 				if (value === Localized.jupyterSelfCertEnable) {
 					solveCertificateProblem("self-signed", "allow");
 					await workspace

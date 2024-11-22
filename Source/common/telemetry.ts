@@ -124,6 +124,7 @@ type JupyterHubUrlDataClassification = {
 };
 function stripPIIFromVersion(version: string) {
 	const parts = version.split(".");
+
 	if (parts.length < 2) {
 		return 0;
 	}

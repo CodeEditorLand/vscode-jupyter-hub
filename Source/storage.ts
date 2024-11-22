@@ -8,6 +8,7 @@ import { traceError } from "./common/logging";
 import { IJupyterHubServerStorage, JupyterHubServer } from "./types";
 
 const serverListStorageKey = "JupyterHubServers";
+
 const AuthKeyPrefix = "JupyterHubServerAuthInfo_";
 function getAuthInfoKey(serverId: string) {
 	return `${AuthKeyPrefix}${serverId}`;
@@ -23,6 +24,7 @@ export class JupyterHubServerStorage implements IJupyterHubServerStorage {
 	private disposable = new DisposableStore();
 	_onDidRemove = new EventEmitter<JupyterHubServer>();
 	onDidRemove = this._onDidRemove.event;
+
 	constructor(
 		private readonly secrets: SecretStorage,
 		private readonly globalMemento: Memento,
@@ -44,6 +46,7 @@ export class JupyterHubServerStorage implements IJupyterHubServerStorage {
 	> {
 		try {
 			const js = await this.secrets.get(getAuthInfoKey(serverId));
+
 			if (!js) {
 				return;
 			}
@@ -52,6 +55,7 @@ export class JupyterHubServerStorage implements IJupyterHubServerStorage {
 			traceError(
 				`Failed to extract stored username/password ${serverId}`,
 			);
+
 			return;
 		}
 	}

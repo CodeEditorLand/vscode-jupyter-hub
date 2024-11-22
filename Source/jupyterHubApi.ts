@@ -88,8 +88,11 @@ export async function getVersion(
 	// Otherwise request hub/api. This should return the json with the hub version
 	// if this is a hub url
 	const apiUrl = appendUrlPath(url, "hub/api");
+
 	let response: Response | undefined;
+
 	let messageTemplate = `Invalid Jupyter Hub Url ${apiUrl} (failed to get version)`;
+
 	try {
 		const response = await fetch.send(
 			apiUrl,
@@ -100,9 +103,12 @@ export async function getVersion(
 			},
 			token,
 		);
+
 		if (response.status === 200) {
 			messageTemplate = `Invalid Jupyter Hub Url ${apiUrl} (failed to parse response)`;
+
 			const { version }: { version: string } = await response.json();
+
 			return version;
 		}
 		throw new Error("Non 200 response");
@@ -128,6 +134,7 @@ export async function deleteApiToken(
 		baseUrl,
 		`hub/api/users/${username}/tokens/${tokenId}`,
 	);
+
 	const options = {
 		method: "DELETE",
 		headers: { Authorization: `token ${token}` },
@@ -144,10 +151,12 @@ export async function verifyApiToken(
 ) {
 	try {
 		await getUserInfo(baseUrl, username, token, fetch, cancellationToken);
+
 		return true;
 	} catch (ex) {
 		// Capture errors, with CORS we can get an error here even if the token is valid.
 		traceDebug(`Token is no longer valid`, ex);
+
 		return false;
 	}
 }
@@ -160,8 +169,10 @@ export async function generateNewApiToken(
 	cancellationToken: CancellationToken,
 ): Promise<{ token: string; tokenId: string }> {
 	let response: Response | undefined;
+
 	try {
 		const url = appendUrlPath(baseUrl, `hub/api/users/${username}/tokens`);
+
 		const body = {
 			auth: { username: username, password: password },
 			note: `Requested by JupyterHub extension in VSCode`,
@@ -172,8 +183,10 @@ export async function generateNewApiToken(
 			{ method: "POST", body: JSON.stringify(body) },
 			cancellationToken,
 		);
+
 		const json = (await response.json()) as ResponseType;
 		traceDebug(`Generated new token for user using the new way`);
+
 		return { token: json.token, tokenId: json.id };
 	} catch (ex) {
 		traceError(
@@ -183,6 +196,7 @@ export async function generateNewApiToken(
 			),
 			ex,
 		);
+
 		return generateNewApiTokenOldWay(
 			baseUrl,
 			username,
@@ -207,22 +221,28 @@ export async function generateNewApiTokenOldWay(
 ): Promise<{ token: string; tokenId: string }> {
 	try {
 		const url = appendUrlPath(baseUrl, `hub/api/authorizations/token`);
+
 		const body = { username: username, password: password };
 		type ResponseType = { user: {}; token: string };
+
 		const response = await fetch.send(
 			url,
 			{ method: "POST", body: JSON.stringify(body) },
 			cancellationToken,
 		);
+
 		const json = (await response.json()) as ResponseType;
+
 		if (json.token) {
 			traceDebug(`Generated new token for user using the old way`);
 			trackUsageOfOldApiGeneration(baseUrl);
+
 			return { token: json.token, tokenId: "" };
 		}
 		throw new Error("Unable to generate Token using the old api route");
 	} catch (ex) {
 		traceError(`Failed to generate token, trying old way`, ex);
+
 		throw ex;
 	}
 }
@@ -237,21 +257,27 @@ export async function getUserInfo(
 	traceDebug(
 		`Getting user info for user ${baseUrl}, token length = ${token.length} && ${token.trim().length}`,
 	);
+
 	const path = includeStoppedServers
 		? `hub/api/users/${username}?include_stopped_servers`
 		: `hub/api/users/${username}`;
+
 	const url = appendUrlPath(baseUrl, path);
+
 	const headers = { Authorization: `token ${token}` };
+
 	const response = await fetch.send(
 		url,
 		{ method: "GET", headers },
 		cancellationToken,
 	);
+
 	if (response.status === 200) {
 		const json = await response.json();
 		traceDebug(
 			`Got user info for user ${baseUrl} = ${JSON.stringify(json)}`,
 		);
+
 		return json;
 	}
 	throw new Error(
@@ -273,6 +299,7 @@ export async function getUserJupyterUrl(
 	// If we have a server name, then also get a list of the stopped servers.
 	// Possible the server has been stopped.
 	const includeStoppedServers = !!serverName;
+
 	const info = await getUserInfo(
 		baseUrl,
 		username,
@@ -281,9 +308,11 @@ export async function getUserJupyterUrl(
 		cancelToken,
 		includeStoppedServers,
 	);
+
 	if (serverName) {
 		// Find the server in the list
 		const server = (info.servers || {})[serverName];
+
 		if (server?.url) {
 			return appendUrlPath(baseUrl, server.url);
 		}
@@ -291,17 +320,20 @@ export async function getUserJupyterUrl(
 		traceError(
 			`Failed to get the user Jupyter Url for ${serverName} existing servers include ${JSON.stringify(info)}`,
 		);
+
 		throw new Error(
 			`Named Jupyter Server '${serverName}' not found, existing servers include ${servers.join(", ")}`,
 		);
 	} else {
 		const defaultServer = (info.servers || {})[""]?.url || info.server;
+
 		if (defaultServer) {
 			return appendUrlPath(baseUrl, defaultServer);
 		}
 		traceError(
 			`Failed to get the user Jupyter Url as there is no default server for the user ${JSON.stringify(info)}`,
 		);
+
 		return appendUrlPath(baseUrl, `user/${username}/`);
 	}
 }
@@ -326,6 +358,7 @@ export async function listServers(
 				`Failed to get user info with stopped servers, defaulting without`,
 				ex,
 			);
+
 			return getUserInfo(baseUrl, username, token, fetch, cancelToken);
 		});
 
@@ -335,6 +368,7 @@ export async function listServers(
 			`Failed to get a list of servers for the user ${username}`,
 			ex,
 		);
+
 		return [];
 	}
 }
@@ -353,12 +387,15 @@ export async function startServer(
 				`hub/api/users/${username}/servers/${encodeURIComponent(serverName)}`,
 			)
 		: appendUrlPath(baseUrl, `hub/api/users/${username}/server`);
+
 	const headers = { Authorization: `token ${token}` };
+
 	const response = await fetch.send(
 		url,
 		{ method: "POST", headers },
 		cancellationToken,
 	);
+
 	if (response.status === 201 || response.status === 202) {
 		return;
 	}
@@ -377,6 +414,7 @@ async function getResponseErrorMessageToThrowOrLog(
 		return message;
 	}
 	let responseText = "";
+
 	try {
 		responseText = await response.text();
 	} catch (ex) {
@@ -406,6 +444,7 @@ export async function createServerConnectSettings(
 		fetch,
 		cancelToken,
 	);
+
 	let serverSettings: Partial<ServerConnection.ISettings> = {
 		baseUrl,
 		appUrl: "",
@@ -464,6 +503,7 @@ export async function getJupyterHubBaseUrl(
 	token: CancellationToken,
 ): Promise<string> {
 	const cachedBaseUrl = cacheOfBaseUrls.get(url);
+
 	if (cachedBaseUrl) {
 		return cachedBaseUrl;
 	}
@@ -473,6 +513,7 @@ export async function getJupyterHubBaseUrl(
 	// If the URL has the /user/ option in it, it's likely this is jupyter hub
 	if (await getVersion(url, fetch, token).catch(noop)) {
 		cacheOfBaseUrls.set(url, url);
+
 		return url;
 	}
 
@@ -482,8 +523,10 @@ export async function getJupyterHubBaseUrl(
 				0,
 				url.toLowerCase().indexOf("/user/"),
 			);
+
 			if (await getVersion(strippedUrl, fetch, token).catch(noop)) {
 				cacheOfBaseUrls.set(url, strippedUrl);
+
 				return strippedUrl;
 			}
 		} catch {
@@ -493,6 +536,7 @@ export async function getJupyterHubBaseUrl(
 
 	if (await getVersion(new URL(url).origin, fetch, token).catch(noop)) {
 		cacheOfBaseUrls.set(url, new URL(url).origin);
+
 		return new URL(url).origin;
 	}
 
@@ -503,7 +547,9 @@ export function extractUserNameFromUrl(url: string) {
 	// User user name from the Url.
 	if (url.toLowerCase().includes("/user/")) {
 		const parts = url.split("/");
+
 		const userIndex = parts.findIndex((p) => p.toLowerCase() === "user");
+
 		if (userIndex > 0 && parts.length >= userIndex + 1) {
 			return parts[userIndex + 1].trim();
 		}
@@ -512,7 +558,9 @@ export function extractUserNameFromUrl(url: string) {
 export function extractTokenFromUrl(url: string) {
 	try {
 		const parsedUrl = new URL(url);
+
 		const token = parsedUrl.searchParams.get("token");
+
 		return token || "";
 	} catch {
 		return "";

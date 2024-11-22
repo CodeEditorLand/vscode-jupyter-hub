@@ -52,6 +52,7 @@ export class DisposableStore {
 	private readonly disposables: IDisposable[] = [];
 	add<T extends IDisposable>(disposable: T) {
 		this.disposables.push(disposable);
+
 		return disposable;
 	}
 	dispose() {

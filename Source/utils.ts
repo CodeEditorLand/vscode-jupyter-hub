@@ -23,6 +23,7 @@ export function isWebExtension() {
 
 export async function getJupyterApi() {
 	const ext = extensions.getExtension<Jupyter>(JUPYTER_EXTENSION_ID);
+
 	if (!ext) {
 		throw new Error("Jupyter Extension not installed");
 	}

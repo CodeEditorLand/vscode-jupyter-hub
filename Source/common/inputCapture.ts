@@ -87,6 +87,7 @@ export class WorkflowInputCapture {
 						input.validationMessage = await options.validateInput(
 							input.value,
 						);
+
 						if (input.validationMessage) {
 							return;
 						}
@@ -148,6 +149,7 @@ export class WorkflowInputCapture {
 					// or display a new quick pick or ui.
 					// Hence mark this as busy until we dismiss this UI.
 					input.busy = true;
+
 					if (input.selectedItems.length === 1) {
 						resolve(input.selectedItems[0]);
 					} else {
@@ -177,6 +179,7 @@ export class WorkflowQuickInputCapture {
 		QuickPickItemButtonEvent<QuickPickItem>
 	>();
 	readonly onDidTriggerItemButton = this._onDidTriggerItemButton.event;
+
 	constructor() {
 		this.disposables.push(this._onDidTriggerItemButton);
 	}

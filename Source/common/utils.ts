@@ -7,7 +7,9 @@ export const noop = () => {
 
 export function uuid() {
 	const id = [];
+
 	const chars = "0123456789abcdef";
+
 	for (var i = 0; i < 36; i++) {
 		id[i] = chars.substring(Math.floor(Math.random() * 0x10))[0];
 	}

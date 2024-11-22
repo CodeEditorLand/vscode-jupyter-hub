@@ -10,11 +10,14 @@ import { ClassType } from "./common/types";
 export interface IJupyterRequestCreator {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	getRequestCtor(getAuthHeader?: () => any): ClassType<Request>;
+
 	getFetchMethod(): (
 		input: RequestInfo,
 		init?: RequestInit,
 	) => Promise<Response>;
+
 	getHeadersCtor(): ClassType<Headers>;
+
 	getRequestInit(): RequestInit;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	createHttpRequestAgent?(): any;
@@ -35,6 +38,7 @@ export interface IJupyterHubServerStorage {
 	onDidRemove: Event<JupyterHubServer>;
 	all: JupyterHubServer[];
 	dispose(): void;
+
 	getCredentials(
 		serverId: string,
 	): Promise<{ username: string; password: string } | undefined>;

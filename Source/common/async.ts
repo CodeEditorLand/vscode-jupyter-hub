@@ -5,6 +5,7 @@ import { CancellationError, CancellationToken, Disposable } from "vscode";
 
 export async function sleep(timeout: number, token?: CancellationToken) {
 	let disposables: Disposable[] = [];
+
 	const promise = new Promise((resolve) => {
 		const timer = setTimeout(resolve, timeout);
 		disposables.push(new Disposable(() => clearTimeout(timer)));
@@ -38,6 +39,7 @@ export function raceTimeout<T>(
 	...promises: Promise<T>[]
 ): Promise<T> {
 	const resolveValue = isPromiseLike(defaultValue) ? undefined : defaultValue;
+
 	if (isPromiseLike(defaultValue)) {
 		promises.push(defaultValue as unknown as Promise<T>);
 	}
@@ -61,6 +63,7 @@ export function raceTimeoutError<T>(
 	...promises: Promise<T>[]
 ): Promise<T> {
 	let promiseReject: ((value: unknown) => void) | undefined = undefined;
+
 	const timer = setTimeout(() => promiseReject?.(error), timeout);
 
 	return Promise.race([
@@ -84,6 +87,7 @@ export async function raceCancellation<T>(
 	...promises: Promise<T>[]
 ): Promise<T | undefined> {
 	let value: T | undefined;
+
 	if (isPromiseLike(defaultValue)) {
 		promises.push(defaultValue as unknown as Promise<T>);
 		value = undefined;
@@ -204,5 +208,6 @@ export function createDeferredFromPromise<T>(promise: Promise<T>): Deferred<T> {
 	promise
 		.then(deferred.resolve.bind(deferred))
 		.catch(deferred.reject.bind(deferred));
+
 	return deferred;
 }

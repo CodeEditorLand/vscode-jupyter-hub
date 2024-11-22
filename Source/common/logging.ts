@@ -18,7 +18,9 @@ disposableStore.add(
 	workspace.onDidChangeConfiguration((e) => {
 		if (e.affectsConfiguration("jupyterhub.log")) {
 			let setting: string = workspace.getConfiguration("jupyterhub").log;
+
 			setting = setting.toLowerCase();
+
 			if (
 				setting === "error" ||
 				setting === "debug" ||
@@ -61,10 +63,15 @@ function logMessage(level: "error" | "debug" | "warn", ...data: unknown[]) {
 
 function getTimeForLogging(): string {
 	const date = new Date();
+
 	const hours = String(date.getHours()).padStart(2, "0");
+
 	const minutes = String(date.getMinutes()).padStart(2, "0");
+
 	const seconds = String(date.getSeconds()).padStart(2, "0");
+
 	const millis = String(date.getMilliseconds()).padStart(3, "0");
+
 	return `${hours}:${minutes}:${seconds}.${millis}`;
 }
 
@@ -74,11 +81,13 @@ function formatErrors(...args: unknown[]) {
 			return arg;
 		}
 		const info: string[] = [`${arg.name}: ${arg.message}`.trim()];
+
 		if (arg.stack) {
 			const stack = (arg.stack || "")
 				.split(/\r?\n/g)
 				.map((l) => l.trim()); // remove tabs and other white space
 			const firstStackLine = stack.find((l) => l.indexOf("at ") === 0);
+
 			if (stack.length === 1) {
 				//
 			} else if (stack.length === 1) {
@@ -96,6 +105,7 @@ function formatErrors(...args: unknown[]) {
 			.forEach((key) =>
 				info.push(`${key} = ${String((arg as any)[key]).trim()}`),
 			);
+
 		return info
 			.filter((l) => l.trim().length)
 			.map((l, i) => (i === 0 ? l : `    > ${l}`))

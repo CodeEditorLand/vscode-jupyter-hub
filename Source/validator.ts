@@ -51,11 +51,14 @@ export class JupyterHubConnectionValidator
 		mainCancel: CancellationToken,
 	): Promise<void> {
 		const disposable = new DisposableStore();
+
 		const masterCancel = disposable.add(new CancellationTokenSource());
+
 		const token = masterCancel.token;
 		disposable.add(
 			mainCancel.onCancellationRequested(() => masterCancel.cancel()),
 		);
+
 		try {
 			const info = await getUserInfo(
 				baseUrl,
@@ -64,17 +67,20 @@ export class JupyterHubConnectionValidator
 				this.fetch,
 				token,
 			);
+
 			if (info.name) {
 				return;
 			} else {
 				traceError(
 					`Failed to get user info, got ${JSON.stringify(info)}`,
 				);
+
 				throw new Error("Failed to get user info");
 			}
 		} catch (err) {
 			if (isSelfCertsError(err)) {
 				const handled = await handleSelfCertsError(err.message);
+
 				if (handled) {
 					// Try again, there could be other errors.
 					return await this.validateJupyterUri(
@@ -86,6 +92,7 @@ export class JupyterHubConnectionValidator
 				}
 			} else if (isSelfCertsExpiredError(err)) {
 				const handled = await handleExpiredCertsError(err.message);
+
 				if (handled) {
 					// Try again, there could be other errors.
 					return await this.validateJupyterUri(
@@ -120,9 +127,11 @@ export class JupyterHubConnectionValidator
 			},
 			async (progress, progressCancel) => {
 				const disposable = new DisposableStore();
+
 				const masterCancel = disposable.add(
 					new CancellationTokenSource(),
 				);
+
 				const token = masterCancel.token;
 				disposable.add(
 					mainCancel.onCancellationRequested(() =>
@@ -134,6 +143,7 @@ export class JupyterHubConnectionValidator
 						masterCancel.cancel(),
 					),
 				);
+
 				try {
 					// Check if the server is running.
 					const didStartServer = await this.startIfServerNotStarted(
@@ -143,16 +153,19 @@ export class JupyterHubConnectionValidator
 						progress,
 						token,
 					).catch((ex) => traceError(`Failed to start server`, ex));
+
 					const started = new StopWatch();
 					// Get the auth information again, as the previously held auth information does not seem to work when starting a jupyter server
 					const jupyterAuth = await authenticator.getJupyterAuthInfo(
 						{ baseUrl, authInfo },
 						token,
 					);
+
 					if (!jupyterAuth) {
 						throw new Error("Failed to get Jupyter Auth Info");
 					}
 					let retries = 0;
+
 					while (true) {
 						// Attempt to list the running kernels. It will return empty if there are none, but will
 						// throw if can't connect.
@@ -166,10 +179,12 @@ export class JupyterHubConnectionValidator
 							this.fetch,
 							token,
 						);
+
 						const gotKernelSpecs = await getKernelSpecs(
 							settings,
 							token,
 						);
+
 						if (gotKernelSpecs) {
 							return;
 						}
@@ -178,6 +193,7 @@ export class JupyterHubConnectionValidator
 						if (didStartServer == "didStartServer") {
 							// Wait for the server to start.
 							await sleep(1000, token);
+
 							if (
 								retries > 0 &&
 								started.elapsed >
@@ -192,6 +208,7 @@ export class JupyterHubConnectionValidator
 								traceDebug(
 									`Waiting for Jupyter Server to start ${baseUrl}`,
 								);
+
 								continue;
 							}
 						} else {
@@ -203,6 +220,7 @@ export class JupyterHubConnectionValidator
 				} catch (err) {
 					if (isSelfCertsError(err)) {
 						const handled = await handleSelfCertsError(err.message);
+
 						if (handled) {
 							// Try again, there could be other errors.
 							return await this.validateJupyterUri(
@@ -216,6 +234,7 @@ export class JupyterHubConnectionValidator
 						const handled = await handleExpiredCertsError(
 							err.message,
 						);
+
 						if (handled) {
 							// Try again, there could be other errors.
 							return await this.validateJupyterUri(
@@ -252,6 +271,7 @@ export class JupyterHubConnectionValidator
 		token: CancellationToken,
 	) {
 		const includeStoppedServers = !!serverName;
+
 		try {
 			const status = await getUserInfo(
 				baseUrl,
@@ -261,6 +281,7 @@ export class JupyterHubConnectionValidator
 				token,
 				includeStoppedServers,
 			);
+
 			if (!serverName && (status.servers || {})[""]?.ready) {
 				return;
 			}
@@ -269,6 +290,7 @@ export class JupyterHubConnectionValidator
 			}
 		} catch (ex) {
 			traceError(`Failed to get user info`, ex);
+
 			return;
 		}
 		progress.report({ message: Localized.startingJupyterServer });
@@ -284,8 +306,10 @@ export class JupyterHubConnectionValidator
 				? undefined
 				: traceError(`Failed to start the Jupyter Server`, ex),
 		);
+
 		try {
 			const started = Date.now();
+
 			while (true) {
 				const status = await getUserInfo(
 					baseUrl,
@@ -295,6 +319,7 @@ export class JupyterHubConnectionValidator
 					token,
 					includeStoppedServers,
 				);
+
 				if (!serverName && (status.servers || {})[""]?.ready) {
 					return "didStartServer";
 				}
@@ -310,17 +335,20 @@ export class JupyterHubConnectionValidator
 								status.server
 							}, as server status is ${JSON.stringify(server)}`,
 						);
+
 						return "didStartServer";
 					}
 					traceError(
 						`Timeout waiting for Jupyter Server to start, current status = ${status.pending}`,
 					);
+
 					return;
 				}
 				await sleep(1000, token);
 			}
 		} catch (ex) {
 			traceError(`Failed to get user info for user`, ex);
+
 			return;
 		}
 	}
@@ -331,12 +359,16 @@ export async function getKernelSpecs(
 	token: CancellationToken,
 ): Promise<ISpecModels | null | undefined> {
 	const specsManager = new KernelSpecManager({ serverSettings });
+
 	const kernelManager = new KernelManager({ serverSettings });
+
 	const sessionManager = new SessionManager({
 		serverSettings,
 		kernelManager: kernelManager,
 	});
+
 	const disposables: Disposable[] = [];
+
 	try {
 		const hasKernelSpecs = () =>
 			specsManager.specs &&
@@ -354,6 +386,7 @@ export async function getKernelSpecs(
 				sessionManager.ready,
 			),
 		);
+
 		if (hasKernelSpecs()) {
 			return specsManager.specs;
 		}
@@ -367,6 +400,7 @@ export async function getKernelSpecs(
 				specsManager.refreshSpecs(),
 			),
 		);
+
 		if (hasKernelSpecs()) {
 			return specsManager.specs;
 		}
@@ -400,6 +434,7 @@ export async function getKernelSpecs(
 		traceError(
 			`SessionManager cannot enumerate kernelSpecs. Specs ${JSON.stringify(specsManager.specs?.kernelspecs)}.`,
 		);
+
 		return;
 	} catch (e) {
 		if (!(e instanceof CancellationError)) {
@@ -408,6 +443,7 @@ export async function getKernelSpecs(
 		return;
 	} finally {
 		dispose(disposables);
+
 		try {
 			// Make sure it finishes startup.
 			await raceTimeout(10_000, sessionManager.ready);
@@ -462,13 +498,16 @@ export function isSelfCertsError(err: Error) {
 export async function handleSelfCertsError(message: string): Promise<boolean> {
 	// On a self cert error, warn the user and ask if they want to change the setting
 	const enableOption: string = Localized.jupyterSelfCertEnable;
+
 	const closeOption: string = Localized.jupyterSelfCertClose;
+
 	const value = await window.showErrorMessage(
 		Localized.jupyterSelfCertFail(message),
 		{ modal: true },
 		enableOption,
 		closeOption,
 	);
+
 	if (value === enableOption) {
 		solveCertificateProblem("self-signed", "allow");
 		await workspace
@@ -478,6 +517,7 @@ export async function handleSelfCertsError(message: string): Promise<boolean> {
 				true,
 				ConfigurationTarget.Workspace,
 			);
+
 		return true;
 	} else {
 		solveCertificateProblem("self-signed", "cancel");
@@ -502,13 +542,16 @@ export async function handleExpiredCertsError(
 ): Promise<boolean> {
 	// On a self cert error, warn the user and ask if they want to change the setting
 	const enableOption: string = Localized.jupyterSelfCertEnable;
+
 	const closeOption: string = Localized.jupyterSelfCertClose;
+
 	const value = await window.showErrorMessage(
 		Localized.jupyterExpiredCertFail(message),
 		{ modal: true },
 		enableOption,
 		closeOption,
 	);
+
 	if (value === enableOption) {
 		solveCertificateProblem("expired", "allow");
 		await workspace
@@ -518,6 +561,7 @@ export async function handleExpiredCertsError(
 				true,
 				ConfigurationTarget.Workspace,
 			);
+
 		return true;
 	} else {
 		solveCertificateProblem("expired", "cancel");

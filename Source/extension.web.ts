@@ -16,18 +16,23 @@ import { getJupyterApi, setIsWebExtension } from "./utils";
 
 export async function activate(context: ExtensionContext) {
 	trackInstallOfExtension();
+
 	setIsWebExtension();
 	context.subscriptions.push(disposableStore);
+
 	getJupyterApi()
 		.then((api) => {
 			const requestCreator = new JupyterRequestCreator();
+
 			const fetch = new SimpleFetch(requestCreator);
+
 			const storage = disposableStore.add(
 				new JupyterHubServerStorage(
 					context.secrets,
 					context.globalState,
 				),
 			);
+
 			const uriCapture = disposableStore.add(
 				new JupyterHubUrlCapture(fetch, storage),
 			);

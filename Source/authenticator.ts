@@ -29,6 +29,7 @@ export class Authenticator implements IAuthenticator {
 				this.fetch,
 				token,
 			);
+
 			if (isApiTokenValid) {
 				return { tokenId: "", token: options.authInfo.password };
 			}
@@ -41,6 +42,7 @@ export class Authenticator implements IAuthenticator {
 				this.fetch,
 				token,
 			);
+
 			if (isApiTokenValid) {
 				return { tokenId: "", token: options.authInfo.token };
 			}

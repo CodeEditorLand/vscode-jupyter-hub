@@ -46,6 +46,7 @@ export class JupyterHubUrlCapture {
 	private readonly displayNamesOfHandles = new Map<string, string>();
 	private readonly newAuthenticator: Authenticator;
 	private readonly disposable = new DisposableStore();
+
 	constructor(
 		private readonly fetch: SimpleFetch,
 		private readonly storage: JupyterHubServerStorage,
@@ -104,6 +105,7 @@ export class JupyterHubUrlCapture {
 			errorMessage: validationErrorMessage,
 			serverId: id,
 		};
+
 		const steps: MultiStep<Step, State>[] = [
 			new GetUrlStep(this.fetch),
 			new GetUserName(),
@@ -112,8 +114,11 @@ export class JupyterHubUrlCapture {
 			new ServerSelector(this.fetch),
 			new GetDisplayName(this.storage),
 		];
+
 		const disposables = new DisposableStore();
+
 		let nextStep: Step | undefined = "Get Url";
+
 		if (url) {
 			// Validate the URI first, which would otherwise be validated when user enters the Uri into the input box.
 			if (isValidUrl(url)) {
@@ -123,6 +128,7 @@ export class JupyterHubUrlCapture {
 						this.fetch,
 						token,
 					);
+
 					const version = await getVersion(
 						state.baseUrl,
 						this.fetch,
@@ -145,17 +151,22 @@ export class JupyterHubUrlCapture {
 		}
 		try {
 			const stepsExecuted: Step[] = [];
+
 			while (true) {
 				const step = steps
 					.filter((s) => !s.disabled)
 					.find((s) => s.step === nextStep);
+
 				if (!step) {
 					traceError(`Step '${nextStep}' Not found`);
+
 					throw new CancellationError();
 				}
 				nextStep = await step.run(state, token);
+
 				if (nextStep === "Before") {
 					sendJupyterHubUrlNotAdded("back", step.step);
+
 					return;
 				}
 				if (nextStep === "After") {
@@ -174,6 +185,7 @@ export class JupyterHubUrlCapture {
 							tokenId: state.auth.tokenId,
 						},
 					);
+
 					return {
 						id,
 						label: state.displayName,
@@ -185,6 +197,7 @@ export class JupyterHubUrlCapture {
 					// So, remove everything from the stack that we have executed in the past.
 					if (stepsExecuted.includes(nextStep)) {
 						stepsExecuted.splice(stepsExecuted.indexOf(nextStep));
+
 						continue;
 					}
 					if (step.canNavigateBackToThis) {
@@ -194,9 +207,11 @@ export class JupyterHubUrlCapture {
 				}
 				if (stepsExecuted.length) {
 					nextStep = stepsExecuted.pop();
+
 					continue;
 				}
 				sendJupyterHubUrlNotAdded("cancel", step.step);
+
 				return;
 			}
 		} catch (ex) {
@@ -258,6 +273,7 @@ type State = {
 class GetUrlStep extends DisposableStore implements MultiStep<Step, State> {
 	step: Step = "Get Url";
 	canNavigateBackToThis = true;
+
 	constructor(private readonly fetch: SimpleFetch) {
 		super();
 	}
@@ -269,6 +285,7 @@ class GetUrlStep extends DisposableStore implements MultiStep<Step, State> {
 				const text = isWebExtension()
 					? ""
 					: await env.clipboard.readText();
+
 				const parsedUri = new URL(text.trim());
 				// Only display http/https uris.
 				state.url =
@@ -283,6 +300,7 @@ class GetUrlStep extends DisposableStore implements MultiStep<Step, State> {
 		}
 		const validationMessage = state.errorMessage;
 		state.errorMessage = "";
+
 		const url = await this.add(new WorkflowInputCapture()).getValue(
 			{
 				title: Localized.titleOfInputBoxToEnterUrl,
@@ -291,6 +309,7 @@ class GetUrlStep extends DisposableStore implements MultiStep<Step, State> {
 				validationMessage,
 				validateInput: async (value) => {
 					value = value.trim();
+
 					if (!isValidUrl(value)) {
 						return Localized.jupyterSelectURIInvalidURI;
 					}
@@ -301,6 +320,7 @@ class GetUrlStep extends DisposableStore implements MultiStep<Step, State> {
 							`Failed to determine base url for ${value}`,
 							ex,
 						);
+
 						return Localized.invalidJupyterHubUrl;
 					}
 				},
@@ -317,12 +337,14 @@ class GetUrlStep extends DisposableStore implements MultiStep<Step, State> {
 		state.auth.username =
 			state.auth.username || extractUserNameFromUrl(url) || "";
 		state.auth.token = state.auth.token || extractTokenFromUrl(url) || "";
+
 		return "Get Username";
 	}
 }
 class GetUserName extends DisposableStore implements MultiStep<Step, State> {
 	step: Step = "Get Username";
 	canNavigateBackToThis = true;
+
 	async run(state: State, token: CancellationToken) {
 		const errorMessage = state.errorMessage;
 		state.errorMessage = ""; // Never display this validation message again.
@@ -337,16 +359,19 @@ class GetUserName extends DisposableStore implements MultiStep<Step, State> {
 			},
 			token,
 		);
+
 		if (!username) {
 			return;
 		}
 		state.auth.username = username;
+
 		return "Get Password";
 	}
 }
 class GetPassword extends DisposableStore implements MultiStep<Step, State> {
 	step: Step = "Get Password";
 	canNavigateBackToThis = true;
+
 	constructor(private readonly authenticator: IAuthenticator) {
 		super();
 	}
@@ -358,10 +383,12 @@ class GetPassword extends DisposableStore implements MultiStep<Step, State> {
 		// In vscode.dev or the like, username/password auth doesn't work
 		// as JupyterHub doesn't support CORS. So we need to use API tokens.
 		const input = this.add(new WorkflowInputCapture());
+
 		const moreInfo: QuickInputButton = {
 			iconPath: new ThemeIcon("info"),
 			tooltip: Localized.authMethodApiTokenMoreInfoTooltip,
 		};
+
 		const password = await input.getValue(
 			{
 				title: Localized.capturePasswordTitle,
@@ -388,6 +415,7 @@ class GetPassword extends DisposableStore implements MultiStep<Step, State> {
 					}
 					try {
 						state.auth.password = value;
+
 						const result =
 							await this.authenticator.getJupyterAuthInfo(
 								{
@@ -407,6 +435,7 @@ class GetPassword extends DisposableStore implements MultiStep<Step, State> {
 						);
 					} catch (err) {
 						traceError("Failed to get Auth Info", err);
+
 						if (err instanceof CancellationError) {
 							throw err;
 						} else if (isSelfCertsError(err)) {
@@ -420,6 +449,7 @@ class GetPassword extends DisposableStore implements MultiStep<Step, State> {
 								`Failed to validate username and password for ${state.baseUrl}`,
 								err,
 							);
+
 							return Localized.usernamePasswordAuthFailure;
 						}
 					}
@@ -427,10 +457,12 @@ class GetPassword extends DisposableStore implements MultiStep<Step, State> {
 			},
 			token,
 		);
+
 		if (!password) {
 			return;
 		}
 		state.auth.password = password;
+
 		return "Verify Connection";
 	}
 }
@@ -441,6 +473,7 @@ class VerifyConnection
 {
 	step: Step = "Verify Connection";
 	canNavigateBackToThis = false;
+
 	constructor(
 		private readonly jupyterConnection: JupyterHubConnectionValidator,
 		private readonly authenticator: IAuthenticator,
@@ -460,18 +493,22 @@ class VerifyConnection
 			);
 		} catch (err) {
 			traceError("Uri verification error", err);
+
 			if (err instanceof CancellationError) {
 				throw err;
 			} else if (isSelfCertsError(err)) {
 				state.errorMessage =
 					Localized.jupyterSelfCertFailErrorMessageOnly;
+
 				return "Get Url";
 			} else if (isSelfCertsExpiredError(err)) {
 				state.errorMessage =
 					Localized.jupyterSelfCertExpiredErrorMessageOnly;
+
 				return "Get Url";
 			} else {
 				state.errorMessage = Localized.usernamePasswordAuthFailure;
+
 				return "Get Username";
 			}
 		}
@@ -483,8 +520,10 @@ function getServerStatus(server: ApiTypes.ServerInfo) {
 	switch (server.pending) {
 		case "spawn":
 			return l10n.t("Starting");
+
 		case "stop":
 			return l10n.t("Shutting down");
+
 		default:
 			return server.ready ? l10n.t("Running") : l10n.t("Stopped");
 	}
@@ -493,6 +532,7 @@ class ServerSelector extends DisposableStore implements MultiStep<Step, State> {
 	step: Step = "Server Selector";
 	disabled?: boolean | undefined;
 	canNavigateBackToThis = false;
+
 	constructor(private readonly fetch: SimpleFetch) {
 		super();
 	}
@@ -508,12 +548,14 @@ class ServerSelector extends DisposableStore implements MultiStep<Step, State> {
 				this.fetch,
 				token,
 			);
+
 			if (
 				servers.length === 0 ||
 				(servers.length === 1 && !servers[0].name)
 			) {
 				traceDebug("No servers found for the user");
 				this.disabled = true;
+
 				return "Get Display Name";
 			}
 
@@ -526,6 +568,7 @@ class ServerSelector extends DisposableStore implements MultiStep<Step, State> {
 				description: `(${getServerStatus(server)})`,
 				server,
 			}));
+
 			const selection = await new WorkflowInputCapture().pickValue(
 				{
 					title: l10n.t("Select a Server"),
@@ -533,6 +576,7 @@ class ServerSelector extends DisposableStore implements MultiStep<Step, State> {
 				},
 				token,
 			);
+
 			if (!selection) {
 				return;
 			}
@@ -553,6 +597,7 @@ class ServerSelector extends DisposableStore implements MultiStep<Step, State> {
 class GetDisplayName extends DisposableStore implements MultiStep<Step, State> {
 	step: Step = "Get Display Name";
 	canNavigateBackToThis = false;
+
 	constructor(private readonly storage: JupyterHubServerStorage) {
 		super();
 	}
@@ -565,6 +610,7 @@ class GetDisplayName extends DisposableStore implements MultiStep<Step, State> {
 			state.serverName,
 			this.storage.all.map((s) => s.displayName),
 		);
+
 		const displayName = await this.add(new WorkflowInputCapture()).getValue(
 			{
 				title: Localized.jupyterRenameServer,
@@ -572,10 +618,12 @@ class GetDisplayName extends DisposableStore implements MultiStep<Step, State> {
 			},
 			token,
 		);
+
 		if (!displayName) {
 			return;
 		}
 		state.displayName = displayName;
+
 		return "After";
 	}
 }
@@ -588,15 +636,19 @@ export function getSuggestedDisplayName(
 	const usedNamesSet = new Set(usedNames.map((s) => s.toLowerCase()));
 	usedNamesSet.add("localhost");
 	usedNamesSet.add("");
+
 	const isIPAddress =
 		typeof parseInt(new URL(baseUrl).hostname.charAt(0), 10) === "number";
+
 	let hostName = isIPAddress ? "JupyterHub" : new URL(baseUrl).hostname;
 	hostName = serverName ? `${hostName} (${serverName})` : hostName;
+
 	if (!isIPAddress && !usedNamesSet.has(hostName.toLowerCase())) {
 		return hostName;
 	}
 	for (let i = 0; i < 10; i++) {
 		const name = i === 0 ? hostName : `${hostName} ${i}`;
+
 		if (!usedNamesSet.has(name.toLowerCase())) {
 			return name;
 		}
@@ -607,9 +659,11 @@ export function getSuggestedDisplayName(
 function isValidUrl(value: string) {
 	try {
 		new URL(value);
+
 		return true;
 	} catch (err) {
 		traceDebug(`Failed to parse URI`, err);
+
 		return false;
 	}
 }
