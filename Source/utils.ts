@@ -14,6 +14,7 @@ export function appendUrlPath(baseUrl: string, path: string) {
 }
 
 let isWebExt = false;
+
 export function setIsWebExtension() {
 	isWebExt = true;
 }

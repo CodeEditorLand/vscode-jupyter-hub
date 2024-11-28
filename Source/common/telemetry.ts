@@ -37,6 +37,7 @@ type IGDPRPropertyWithoutMetadata = Omit<
 	IGDPRProperty,
 	"owner" | "comment" | "expiration"
 >;
+
 export type OmitMetadata<T> = Omit<T, "owner" | "comment" | "expiration">;
 
 export type ClassifiedEvent<T extends IGDPRPropertyWithoutMetadata> = {

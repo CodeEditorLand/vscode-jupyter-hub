@@ -33,9 +33,11 @@ export type UnionToIntersection<U> = (
 ) extends (k: infer I) => void
 	? I
 	: never;
+
 export type PickType<T, Value> = {
 	[P in keyof T as T[P] extends Value ? P : never]: T[P];
 };
+
 export type ExcludeType<T, Value> = {
 	[P in keyof T as T[P] extends Value ? never : P]: T[P];
 };
