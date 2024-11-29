@@ -15,6 +15,7 @@ function getAuthInfoKey(serverId: string) {
 }
 type Credentials = {
 	username: string;
+
 	password: string; // Required to re-generate the token.
 	token: string; // Generated using Hub REST API, this api token is used for connecting to Jupyter by Jupyter Extension.
 	tokenId: string; // Requried when we want to delete the token using the Hub REST API.
@@ -22,22 +23,27 @@ type Credentials = {
 
 export class JupyterHubServerStorage implements IJupyterHubServerStorage {
 	private disposable = new DisposableStore();
+
 	_onDidRemove = new EventEmitter<JupyterHubServer>();
+
 	onDidRemove = this._onDidRemove.event;
 
 	constructor(
 		private readonly secrets: SecretStorage,
 		private readonly globalMemento: Memento,
 	) {}
+
 	dispose() {
 		this.disposable.dispose();
 	}
+
 	public get all(): JupyterHubServer[] {
 		return this.globalMemento.get<JupyterHubServer[]>(
 			serverListStorageKey,
 			[],
 		);
 	}
+
 	public async getCredentials(
 		serverId: string,
 	): Promise<
@@ -50,6 +56,7 @@ export class JupyterHubServerStorage implements IJupyterHubServerStorage {
 			if (!js) {
 				return;
 			}
+
 			return JSON.parse(js || "") as Credentials;
 		} catch (ex) {
 			traceError(
@@ -59,17 +66,24 @@ export class JupyterHubServerStorage implements IJupyterHubServerStorage {
 			return;
 		}
 	}
+
 	public async addServerOrUpdate(
 		server: {
 			id: string;
+
 			baseUrl: string;
+
 			displayName: string;
+
 			serverName: string | undefined;
 		},
 		auth: {
 			username: string;
+
 			password: string;
+
 			token: string;
+
 			tokenId: string;
 		},
 	) {
@@ -81,8 +95,10 @@ export class JupyterHubServerStorage implements IJupyterHubServerStorage {
 			this.secrets.store(getAuthInfoKey(server.id), JSON.stringify(auth)),
 		]);
 	}
+
 	public async removeServer(serverId: string) {
 		const item = this.all.find((s) => s.id === serverId);
+
 		await Promise.all([
 			this.globalMemento.update(
 				serverListStorageKey,

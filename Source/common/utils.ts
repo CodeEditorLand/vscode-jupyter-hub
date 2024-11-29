@@ -13,6 +13,7 @@ export function uuid() {
 	for (var i = 0; i < 36; i++) {
 		id[i] = chars.substring(Math.floor(Math.random() * 0x10))[0];
 	}
+
 	id[8] = id[13] = id[18] = id[23] = "-";
 
 	return id.join("");

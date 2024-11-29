@@ -55,8 +55,10 @@ export async function computeHash(
 		if (Object.keys(computedHashes).length > 10_000) {
 			stopStoringHashes = true;
 		}
+
 		computedHashes[data] = hash;
 	}
+
 	return hash;
 }
 

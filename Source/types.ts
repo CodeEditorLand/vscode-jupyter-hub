@@ -25,7 +25,9 @@ export interface IJupyterRequestCreator {
 
 export type JupyterHubServer = {
 	id: string;
+
 	baseUrl: string;
+
 	displayName: string;
 	/**
 	 * Name of the server to start and use.
@@ -36,16 +38,20 @@ export type JupyterHubServer = {
 
 export interface IJupyterHubServerStorage {
 	onDidRemove: Event<JupyterHubServer>;
+
 	all: JupyterHubServer[];
+
 	dispose(): void;
 
 	getCredentials(
 		serverId: string,
 	): Promise<{ username: string; password: string } | undefined>;
+
 	addServerOrUpdate(
 		server: JupyterHubServer,
 		auth: { username: string; password: string },
 	): Promise<void>;
+
 	removeServer(serverId: string): Promise<void>;
 }
 
@@ -54,18 +60,23 @@ export interface IJupyterHubConnectionValidator {
 		baseUrl: string,
 		authInfo: {
 			username: string;
+
 			password: string;
+
 			token?: string;
 		},
 		authenticator: IAuthenticator,
 		token: CancellationToken,
 	): Promise<void>;
+
 	ensureServerIsRunning(
 		baseUrl: string,
 		serverName: string | undefined,
 		authInfo: {
 			username: string;
+
 			password: string;
+
 			token?: string;
 		},
 		authenticator: IAuthenticator,
@@ -77,9 +88,12 @@ export interface IAuthenticator {
 	getJupyterAuthInfo(
 		options: {
 			baseUrl: string;
+
 			authInfo: {
 				username: string;
+
 				password: string;
+
 				token: string;
 			};
 		},

@@ -19,17 +19,25 @@ export interface IPropertyData {
 		| "CustomerContent"
 		| "PublicNonPersonalData"
 		| "EndUserPseudonymizedInformation";
+
 	purpose: "PerformanceAndHealth" | "FeatureInsight" | "BusinessInsight";
+
 	comment: string;
+
 	expiration?: string;
+
 	endpoint?: string;
+
 	isMeasurement?: boolean;
 }
 
 export interface IGDPRProperty {
 	owner: string;
+
 	comment: string;
+
 	expiration?: string;
+
 	readonly [name: string]: IPropertyData | undefined | IGDPRProperty | string;
 }
 
@@ -81,6 +89,7 @@ export function publicLog2<
 	telemetryReporter = telemetryReporter
 		? telemetryReporter
 		: disposableStore.add(new TelemetryReporter(AppInsightsKey));
+
 	telemetryReporter.sendTelemetryEvent(eventName, data);
 }
 
@@ -95,31 +104,47 @@ function getHostName(url: string) {
 
 interface JupyterHubUrlAddedData {
 	serverId: string;
+
 	hostNameHash: string;
+
 	baseUrlHash: string;
+
 	version: number;
 }
 type JupyterHubUrlDataClassification = {
 	owner: "donjayamanne";
+
 	comment: "Jupyter Hub Versions";
+
 	serverId: {
 		classification: "SystemMetaData";
+
 		purpose: "FeatureInsight";
+
 		comment: "unique identifier of server";
 	};
+
 	hostNameHash: {
 		classification: "SystemMetaData";
+
 		purpose: "FeatureInsight";
+
 		comment: "Hash of the host name of the server";
 	};
+
 	baseUrlHash: {
 		classification: "SystemMetaData";
+
 		purpose: "FeatureInsight";
+
 		comment: "Hash of the base url";
 	};
+
 	version: {
 		classification: "SystemMetaData";
+
 		purpose: "FeatureInsight";
+
 		comment: "Version of JupyterHub";
 	};
 };
@@ -129,6 +154,7 @@ function stripPIIFromVersion(version: string) {
 	if (parts.length < 2) {
 		return 0;
 	}
+
 	return parseFloat(`${parseInt(parts[0], 10)}.${parseInt(parts[1], 10)}`);
 }
 
@@ -145,6 +171,7 @@ export function sendJupyterHubUrlAdded(
 	serverId: string,
 ) {
 	urlsAndVersion.set(baseUrl, version);
+
 	Promise.all([
 		getTelemetrySafeHashedString(getHostName(baseUrl)),
 		getTelemetrySafeHashedString(baseUrl),
@@ -165,7 +192,9 @@ export function sendJupyterHubUrlAdded(
 
 interface JupyterHubUrlNotAdded {
 	failed: true;
+
 	reason: "cancel" | "back" | "error";
+
 	lastStep:
 		| ""
 		| "Before"
@@ -179,20 +208,30 @@ interface JupyterHubUrlNotAdded {
 }
 type JupyterHubUrlNotAddedClassification = {
 	owner: "donjayamanne";
+
 	comment: "Url was not added";
+
 	failed: {
 		classification: "SystemMetaData";
+
 		purpose: "FeatureInsight";
+
 		comment: "Indicator that adding the Url failed";
 	};
+
 	reason: {
 		classification: "SystemMetaData";
+
 		purpose: "FeatureInsight";
+
 		comment: "Reason for cancellation, back, cancel or error";
 	};
+
 	lastStep: {
 		classification: "SystemMetaData";
+
 		purpose: "FeatureInsight";
+
 		comment: "Last step the user took before exiting the workflow to add a url";
 	};
 };
@@ -222,19 +261,27 @@ export function sendJupyterHubUrlNotAdded(
 
 interface JupyterHubTokenGeneratedUsingOldAPIData {
 	hostNameHash: string;
+
 	baseUrlHash: string;
 }
 type JupyterHubTokenGeneratedUsingOldAPIDataClassification = {
 	owner: "donjayamanne";
+
 	comment: "Sent when we generate API tokens using the old API";
+
 	hostNameHash: {
 		classification: "SystemMetaData";
+
 		purpose: "FeatureInsight";
+
 		comment: "Hash of the host name of the server";
 	};
+
 	baseUrlHash: {
 		classification: "SystemMetaData";
+
 		purpose: "FeatureInsight";
+
 		comment: "Hash of the base url";
 	};
 };
@@ -258,6 +305,7 @@ export function trackUsageOfOldApiGeneration(baseUrl: string) {
 interface JupyterHubUsage {}
 type JupyterHubUsageClassification = {
 	owner: "donjayamanne";
+
 	comment: "Sent extension activates";
 };
 
@@ -267,19 +315,27 @@ export function trackInstallOfExtension() {
 
 interface JupyterHubUrlCertProblemsSolutionData {
 	solution: "allow" | "cancel";
+
 	problem: "self-signed" | "expired";
 }
 type JupyterHubUrlCertProblemsSolutionDataClassification = {
 	owner: "donjayamanne";
+
 	comment: "Sent when user attempts to overcome a cert problem";
+
 	problem: {
 		classification: "SystemMetaData";
+
 		purpose: "FeatureInsight";
+
 		comment: "Problem with certificate";
 	};
+
 	solution: {
 		classification: "SystemMetaData";
+
 		purpose: "FeatureInsight";
+
 		comment: "How did user solve the cert problem did they allow usage of untrusted certs or cancel adding them";
 	};
 };

@@ -19,11 +19,17 @@ export namespace ApiTypes {
 		 * The user's notebook server's base URL, if running; null if not.
 		 */
 		server?: string;
+
 		last_activity: Date;
+
 		roles: string[];
+
 		groups: string[];
+
 		name: string;
+
 		admin: boolean;
+
 		pending?: null | "spawn" | "stop";
 		/**
 		 * The servers for this user. By default: only includes active servers.
@@ -31,6 +37,7 @@ export namespace ApiTypes {
 		 */
 		servers?: Record<string, ServerInfo>;
 	}
+
 	export interface ServerInfo {
 		/**
 		 * The server's name.
@@ -111,6 +118,7 @@ export async function getVersion(
 
 			return version;
 		}
+
 		throw new Error("Non 200 response");
 	} catch (ex) {
 		throw new Error(
@@ -139,6 +147,7 @@ export async function deleteApiToken(
 		method: "DELETE",
 		headers: { Authorization: `token ${token}` },
 	};
+
 	await fetch.send(url, options, cancellationToken);
 }
 
@@ -177,7 +186,9 @@ export async function generateNewApiToken(
 			auth: { username: username, password: password },
 			note: `Requested by JupyterHub extension in VSCode`,
 		};
+
 		type ResponseType = { user: string; id: string; token: string };
+
 		response = await fetch.send(
 			url,
 			{ method: "POST", body: JSON.stringify(body) },
@@ -185,6 +196,7 @@ export async function generateNewApiToken(
 		);
 
 		const json = (await response.json()) as ResponseType;
+
 		traceDebug(`Generated new token for user using the new way`);
 
 		return { token: json.token, tokenId: json.id };
@@ -223,6 +235,7 @@ export async function generateNewApiTokenOldWay(
 		const url = appendUrlPath(baseUrl, `hub/api/authorizations/token`);
 
 		const body = { username: username, password: password };
+
 		type ResponseType = { user: {}; token: string };
 
 		const response = await fetch.send(
@@ -235,10 +248,12 @@ export async function generateNewApiTokenOldWay(
 
 		if (json.token) {
 			traceDebug(`Generated new token for user using the old way`);
+
 			trackUsageOfOldApiGeneration(baseUrl);
 
 			return { token: json.token, tokenId: "" };
 		}
+
 		throw new Error("Unable to generate Token using the old api route");
 	} catch (ex) {
 		traceError(`Failed to generate token, trying old way`, ex);
@@ -274,12 +289,14 @@ export async function getUserInfo(
 
 	if (response.status === 200) {
 		const json = await response.json();
+
 		traceDebug(
 			`Got user info for user ${baseUrl} = ${JSON.stringify(json)}`,
 		);
 
 		return json;
 	}
+
 	throw new Error(
 		await getResponseErrorMessageToThrowOrLog(
 			`Failed to get user info`,
@@ -316,7 +333,9 @@ export async function getUserJupyterUrl(
 		if (server?.url) {
 			return appendUrlPath(baseUrl, server.url);
 		}
+
 		const servers = Object.keys(info.servers || {});
+
 		traceError(
 			`Failed to get the user Jupyter Url for ${serverName} existing servers include ${JSON.stringify(info)}`,
 		);
@@ -330,6 +349,7 @@ export async function getUserJupyterUrl(
 		if (defaultServer) {
 			return appendUrlPath(baseUrl, defaultServer);
 		}
+
 		traceError(
 			`Failed to get the user Jupyter Url as there is no default server for the user ${JSON.stringify(info)}`,
 		);
@@ -399,6 +419,7 @@ export async function startServer(
 	if (response.status === 201 || response.status === 202) {
 		return;
 	}
+
 	throw new Error(
 		await getResponseErrorMessageToThrowOrLog(
 			`Failed to fetch user info`,
@@ -413,6 +434,7 @@ async function getResponseErrorMessageToThrowOrLog(
 	if (!response) {
 		return message;
 	}
+
 	let responseText = "";
 
 	try {
@@ -423,6 +445,7 @@ async function getResponseErrorMessageToThrowOrLog(
 			ex,
 		);
 	}
+
 	return `${message}, ${response.statusText} (${response.status}) with message  ${responseText}`;
 }
 
@@ -431,6 +454,7 @@ export async function createServerConnectSettings(
 	serverName: string | undefined,
 	authInfo: {
 		username: string;
+
 		token: string;
 	},
 	fetch: SimpleFetch,
@@ -473,6 +497,7 @@ export async function createServerConnectSettings(
 		fetch.requestCreator.createHttpRequestAgent
 	) {
 		const requestAgent = fetch.requestCreator.createHttpRequestAgent();
+
 		requestInit = { ...requestInit, agent: requestAgent };
 	}
 

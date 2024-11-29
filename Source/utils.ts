@@ -28,8 +28,10 @@ export async function getJupyterApi() {
 	if (!ext) {
 		throw new Error("Jupyter Extension not installed");
 	}
+
 	if (!ext.isActive) {
 		await ext.activate();
 	}
+
 	return ext;
 }

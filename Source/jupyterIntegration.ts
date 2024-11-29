@@ -45,15 +45,23 @@ export class JupyterServerIntegration
 	implements JupyterServerProvider, JupyterServerCommandProvider
 {
 	readonly id: string = "UserJupyterServerPickerProviderId";
+
 	readonly documentation = Uri.parse(
 		"https://aka.ms/vscodeJuptyerExtKernelPickerExistingServer",
 	);
+
 	private readonly newAuthenticator: Authenticator;
+
 	private readonly disposables: Disposable[] = [];
+
 	private readonly _onDidChangeServers = new EventEmitter<void>();
+
 	public readonly onDidChangeServers = this._onDidChangeServers.event;
+
 	private previouslyEnteredUrlTypedIntoQuickPick?: string;
+
 	private previouslyEnteredJupyterServerBasedOnUrlTypedIntoQuickPick?: JupyterServer;
+
 	private readonly jupyterConnectionValidator: IJupyterHubConnectionValidator;
 
 	constructor(
@@ -66,6 +74,7 @@ export class JupyterServerIntegration
 		this.jupyterConnectionValidator = new JupyterHubConnectionValidator(
 			fetch,
 		);
+
 		this.newAuthenticator = new Authenticator(fetch);
 
 		const collection = this.jupyterApi.createJupyterServerCollection(
@@ -73,14 +82,20 @@ export class JupyterServerIntegration
 			Localized.KernelActionSourceTitle,
 			this,
 		);
+
 		this.disposables.push(collection);
+
 		this.disposables.push(this._onDidChangeServers);
+
 		collection.commandProvider = this;
+
 		collection.documentation = Uri.parse("https://aka.ms/vscodeJupyterHub");
 	}
+
 	public dispose() {
 		dispose(this.disposables);
 	}
+
 	public async handleCommand(
 		command: JupyterServerCommand & { url?: string },
 		token: CancellationToken,
@@ -104,15 +119,18 @@ export class JupyterServerIntegration
 				this.previouslyEnteredJupyterServerBasedOnUrlTypedIntoQuickPick
 			) {
 				whyCaptureUrl = "cameHereFromBackButton";
+
 				serverId =
 					this
 						.previouslyEnteredJupyterServerBasedOnUrlTypedIntoQuickPick
 						.id;
+
 				displayName =
 					this
 						.previouslyEnteredJupyterServerBasedOnUrlTypedIntoQuickPick
 						.label;
 			}
+
 			const server = await this.urlCapture.captureRemoteJupyterUrl(
 				token,
 				url,
@@ -125,11 +143,14 @@ export class JupyterServerIntegration
 			if (!server) {
 				this.previouslyEnteredJupyterServerBasedOnUrlTypedIntoQuickPick =
 					undefined;
+
 				this.previouslyEnteredUrlTypedIntoQuickPick = undefined;
 
 				return;
 			}
+
 			this._onDidChangeServers.fire();
+
 			this.previouslyEnteredJupyterServerBasedOnUrlTypedIntoQuickPick =
 				server;
 
@@ -138,7 +159,9 @@ export class JupyterServerIntegration
 			if (!(ex instanceof CancellationError)) {
 				traceError(`Failed to select a Jupyter Server`, ex);
 			}
+
 			this.previouslyEnteredUrlTypedIntoQuickPick = undefined;
+
 			this.previouslyEnteredJupyterServerBasedOnUrlTypedIntoQuickPick =
 				undefined;
 
@@ -154,6 +177,7 @@ export class JupyterServerIntegration
 	): Promise<JupyterServerCommand[]> {
 		this.previouslyEnteredJupyterServerBasedOnUrlTypedIntoQuickPick =
 			undefined;
+
 		this.previouslyEnteredUrlTypedIntoQuickPick = undefined;
 
 		let url = "";
@@ -171,6 +195,7 @@ export class JupyterServerIntegration
 		} catch {
 			//
 		}
+
 		if (url) {
 			this.previouslyEnteredUrlTypedIntoQuickPick = url;
 
@@ -178,6 +203,7 @@ export class JupyterServerIntegration
 
 			return [{ label, url } as JupyterServerCommand];
 		}
+
 		return [
 			{
 				label: Localized.labelOfCommandToEnterUrl,
@@ -185,6 +211,7 @@ export class JupyterServerIntegration
 			},
 		];
 	}
+
 	async removeJupyterServer?(server: JupyterServer): Promise<void> {
 		const tokenSource = new CancellationTokenSource();
 
@@ -208,6 +235,7 @@ export class JupyterServerIntegration
 					traceDebug(`Failed to delete token ${server.id}`, ex),
 				);
 			}
+
 			await this.storage.removeServer(server.id);
 		} catch (ex) {
 			traceDebug(`Failed to remove server ${server.id}`, ex);
@@ -215,6 +243,7 @@ export class JupyterServerIntegration
 			this._onDidChangeServers.fire();
 		}
 	}
+
 	async provideJupyterServers(
 		_token: CancellationToken,
 	): Promise<JupyterServer[]> {
@@ -225,26 +254,33 @@ export class JupyterServerIntegration
 			};
 		});
 	}
+
 	private cachedOfAuthInfo = new Map<string, Promise<JupyterServer>>();
+
 	public async resolveJupyterServer(
 		server: JupyterServer,
 		token: CancellationToken,
 	): Promise<JupyterServer> {
 		if (!this.cachedOfAuthInfo.get(server.id)) {
 			const promise = this.resolveJupyterServerImpl(server, token);
+
 			promise.catch((ex) => {
 				if (this.cachedOfAuthInfo.get(server.id) === promise) {
 					traceError(
 						`Failed to get auth information for server ${server.id}`,
 						ex,
 					);
+
 					this.cachedOfAuthInfo.delete(server.id);
 				}
 			});
+
 			this.cachedOfAuthInfo.set(server.id, promise);
 		}
+
 		return this.cachedOfAuthInfo.get(server.id)!;
 	}
+
 	private async resolveJupyterServerImpl(
 		server: JupyterServer,
 		cancelToken: CancellationToken,
@@ -254,6 +290,7 @@ export class JupyterServerIntegration
 		if (!serverInfo) {
 			throw new Error("Server not found");
 		}
+
 		traceDebug(
 			`Server Info for ${server.id} is ${JSON.stringify(serverInfo)}`,
 		);
@@ -337,6 +374,7 @@ export class JupyterServerIntegration
 
 		// https://github.com/microsoft/vscode-jupyter-hub/issues/53
 		const baseUrl = Uri.parse(rawBaseUrl);
+
 		traceDebug(`Resolved server ${server.id} to ${baseUrl.toString(true)}`);
 
 		const brokenUrl = new this.nodeFetchImpl.Request(baseUrl.toString(true))
@@ -352,6 +390,7 @@ export class JupyterServerIntegration
 
 		const ourFetch = async (input: Request, init?: RequestInit) => {
 			const newUrl = input.url.replace(brokenUrl, correctUrl);
+
 			init = init || {
 				method: input.method,
 				body: input.body,
@@ -406,6 +445,7 @@ export class JupyterServerIntegration
 				);
 			}
 		}
+
 		const connectionInformation: JupyterServerConnectionInformation = {
 			baseUrl,
 			token: result.token,

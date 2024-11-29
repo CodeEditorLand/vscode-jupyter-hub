@@ -40,11 +40,14 @@ export class JupyterHubConnectionValidator
 	implements IJupyterHubConnectionValidator
 {
 	constructor(private readonly fetch: SimpleFetch) {}
+
 	async validateJupyterUri(
 		baseUrl: string,
 		authInfo: {
 			username: string;
+
 			password: string;
+
 			token: string;
 		},
 		authenticator: IAuthenticator,
@@ -55,6 +58,7 @@ export class JupyterHubConnectionValidator
 		const masterCancel = disposable.add(new CancellationTokenSource());
 
 		const token = masterCancel.token;
+
 		disposable.add(
 			mainCancel.onCancellationRequested(() => masterCancel.cancel()),
 		);
@@ -103,17 +107,21 @@ export class JupyterHubConnectionValidator
 					);
 				}
 			}
+
 			throw err;
 		} finally {
 			disposable.dispose();
 		}
 	}
+
 	async ensureServerIsRunning(
 		baseUrl: string,
 		serverName: string | undefined,
 		authInfo: {
 			username: string;
+
 			password: string;
+
 			token: string;
 		},
 		authenticator: IAuthenticator,
@@ -133,11 +141,13 @@ export class JupyterHubConnectionValidator
 				);
 
 				const token = masterCancel.token;
+
 				disposable.add(
 					mainCancel.onCancellationRequested(() =>
 						masterCancel.cancel(),
 					),
 				);
+
 				disposable.add(
 					progressCancel.onCancellationRequested(() =>
 						masterCancel.cancel(),
@@ -164,6 +174,7 @@ export class JupyterHubConnectionValidator
 					if (!jupyterAuth) {
 						throw new Error("Failed to get Jupyter Auth Info");
 					}
+
 					let retries = 0;
 
 					while (true) {
@@ -205,6 +216,7 @@ export class JupyterHubConnectionValidator
 							} else {
 								// Retry at least once before we give up.
 								retries += 1;
+
 								traceDebug(
 									`Waiting for Jupyter Server to start ${baseUrl}`,
 								);
@@ -245,6 +257,7 @@ export class JupyterHubConnectionValidator
 							);
 						}
 					}
+
 					throw err;
 				} finally {
 					disposable.dispose();
@@ -261,11 +274,14 @@ export class JupyterHubConnectionValidator
 		serverName: string | undefined,
 		authInfo: {
 			username: string;
+
 			password: string;
+
 			token: string;
 		},
 		progress: Progress<{
 			message?: string | undefined;
+
 			increment?: number | undefined;
 		}>,
 		token: CancellationToken,
@@ -285,6 +301,7 @@ export class JupyterHubConnectionValidator
 			if (!serverName && (status.servers || {})[""]?.ready) {
 				return;
 			}
+
 			if (serverName && (status.servers || {})[serverName]?.ready) {
 				return;
 			}
@@ -293,7 +310,9 @@ export class JupyterHubConnectionValidator
 
 			return;
 		}
+
 		progress.report({ message: Localized.startingJupyterServer });
+
 		await startServer(
 			baseUrl,
 			authInfo.username,
@@ -323,13 +342,16 @@ export class JupyterHubConnectionValidator
 				if (!serverName && (status.servers || {})[""]?.ready) {
 					return "didStartServer";
 				}
+
 				if (serverName && (status.servers || {})[serverName]?.ready) {
 					return "didStartServer";
 				}
+
 				if (Date.now() - started > TIMEOUT_FOR_SESSION_MANAGER_READY) {
 					if (!serverName && status.server) {
 						// Old behaviour of returning the currently running server as the default server.
 						const server = (status.servers || {})[""];
+
 						traceDebug(
 							`Default server status used from status.server 5 ${
 								status.server
@@ -338,12 +360,14 @@ export class JupyterHubConnectionValidator
 
 						return "didStartServer";
 					}
+
 					traceError(
 						`Timeout waiting for Jupyter Server to start, current status = ${status.pending}`,
 					);
 
 					return;
 				}
+
 				await sleep(1000, token);
 			}
 		} catch (ex) {
@@ -408,6 +432,7 @@ export async function getKernelSpecs(
 		// At this point wait for the specs to change
 		const promise = new Promise<unknown>((resolve) => {
 			specsManager.specsChanged.connect(resolve);
+
 			disposables.push(
 				new Disposable(() => {
 					try {
@@ -431,6 +456,7 @@ export async function getKernelSpecs(
 		if (hasKernelSpecs()) {
 			return specsManager.specs;
 		}
+
 		traceError(
 			`SessionManager cannot enumerate kernelSpecs. Specs ${JSON.stringify(specsManager.specs?.kernelspecs)}.`,
 		);
@@ -440,6 +466,7 @@ export async function getKernelSpecs(
 		if (!(e instanceof CancellationError)) {
 			traceError(`SessionManager:getKernelSpecs failure: `, e);
 		}
+
 		return;
 	} finally {
 		dispose(disposables);
@@ -453,9 +480,11 @@ export async function getKernelSpecs(
 			try {
 				sessionManager.dispose();
 			} catch {}
+
 			try {
 				kernelManager.dispose();
 			} catch {}
+
 			try {
 				specsManager.dispose();
 			} catch {}
@@ -510,6 +539,7 @@ export async function handleSelfCertsError(message: string): Promise<boolean> {
 
 	if (value === enableOption) {
 		solveCertificateProblem("self-signed", "allow");
+
 		await workspace
 			.getConfiguration("jupyter")
 			.update(
@@ -522,6 +552,7 @@ export async function handleSelfCertsError(message: string): Promise<boolean> {
 	} else {
 		solveCertificateProblem("self-signed", "cancel");
 	}
+
 	return false;
 }
 
@@ -554,6 +585,7 @@ export async function handleExpiredCertsError(
 
 	if (value === enableOption) {
 		solveCertificateProblem("expired", "allow");
+
 		await workspace
 			.getConfiguration("jupyter")
 			.update(
@@ -566,5 +598,6 @@ export async function handleExpiredCertsError(
 	} else {
 		solveCertificateProblem("expired", "cancel");
 	}
+
 	return false;
 }

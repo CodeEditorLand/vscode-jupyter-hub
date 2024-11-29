@@ -9,12 +9,16 @@ import { IAuthenticator } from "./types";
 
 export class Authenticator implements IAuthenticator {
 	constructor(private readonly fetch: SimpleFetch) {}
+
 	public async getJupyterAuthInfo(
 		options: {
 			baseUrl: string;
+
 			authInfo: {
 				username: string;
+
 				password: string;
+
 				token: string;
 			};
 		},
@@ -34,6 +38,7 @@ export class Authenticator implements IAuthenticator {
 				return { tokenId: "", token: options.authInfo.password };
 			}
 		}
+
 		if (options.authInfo.token) {
 			const isApiTokenValid = await verifyApiToken(
 				options.baseUrl,
@@ -47,6 +52,7 @@ export class Authenticator implements IAuthenticator {
 				return { tokenId: "", token: options.authInfo.token };
 			}
 		}
+
 		return generateNewApiToken(
 			options.baseUrl,
 			options.authInfo.username,

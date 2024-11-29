@@ -19,16 +19,19 @@ export class JupyterRequestCreator implements IJupyterRequestCreator {
 					const authorizationHeader = getAuthHeaders();
 
 					const keys = Object.keys(authorizationHeader);
+
 					keys.forEach((k) =>
 						origHeaders.append(
 							k,
 							authorizationHeader[k].toString(),
 						),
 					);
+
 					origHeaders.set("Content-Type", "application/json");
 
 					// Rewrite the 'append' method for the headers to disallow 'authorization' after this point
 					const origAppend = origHeaders.append.bind(origHeaders);
+
 					origHeaders.append = (k, v) => {
 						if (k.toLowerCase() !== "authorization") {
 							origAppend(k, v);

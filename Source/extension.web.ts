@@ -18,6 +18,7 @@ export async function activate(context: ExtensionContext) {
 	trackInstallOfExtension();
 
 	setIsWebExtension();
+
 	context.subscriptions.push(disposableStore);
 
 	getJupyterApi()
@@ -36,6 +37,7 @@ export async function activate(context: ExtensionContext) {
 			const uriCapture = disposableStore.add(
 				new JupyterHubUrlCapture(fetch, storage),
 			);
+
 			disposableStore.add(
 				new JupyterServerIntegration(
 					fetch,

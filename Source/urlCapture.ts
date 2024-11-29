@@ -43,8 +43,11 @@ import {
 
 export class JupyterHubUrlCapture {
 	private readonly jupyterConnection: JupyterHubConnectionValidator;
+
 	private readonly displayNamesOfHandles = new Map<string, string>();
+
 	private readonly newAuthenticator: Authenticator;
+
 	private readonly disposable = new DisposableStore();
 
 	constructor(
@@ -52,11 +55,14 @@ export class JupyterHubUrlCapture {
 		private readonly storage: JupyterHubServerStorage,
 	) {
 		this.newAuthenticator = new Authenticator(fetch);
+
 		this.jupyterConnection = new JupyterHubConnectionValidator(fetch);
 	}
+
 	dispose() {
 		this.disposable.dispose();
 	}
+
 	public async captureRemoteJupyterUrl(
 		token: CancellationToken,
 		initialUrl: string = "",
@@ -80,9 +86,11 @@ export class JupyterHubUrlCapture {
 			if (!(ex instanceof CancellationError)) {
 				traceError("Failed to capture remote jupyter server", ex);
 			}
+
 			throw ex;
 		}
 	}
+
 	private async captureRemoteJupyterUrlImpl(
 		url: string = "",
 		displayName: string = "",
@@ -134,8 +142,11 @@ export class JupyterHubUrlCapture {
 						this.fetch,
 						token,
 					);
+
 					state.hubVersion = version;
+
 					state.urlWasPrePopulated = true;
+
 					nextStep =
 						reasonForCapture === "captureNewUrl"
 							? "Get Username"
@@ -146,9 +157,11 @@ export class JupyterHubUrlCapture {
 			} else {
 				// Uri has an error, show the error message by displaying the input box and pre-populating the url.
 				validationErrorMessage = Localized.jupyterSelectURIInvalidURI;
+
 				nextStep = "Get Url";
 			}
 		}
+
 		try {
 			const stepsExecuted: Step[] = [];
 
@@ -162,6 +175,7 @@ export class JupyterHubUrlCapture {
 
 					throw new CancellationError();
 				}
+
 				nextStep = await step.run(state, token);
 
 				if (nextStep === "Before") {
@@ -169,8 +183,10 @@ export class JupyterHubUrlCapture {
 
 					return;
 				}
+
 				if (nextStep === "After") {
 					sendJupyterHubUrlAdded(state.baseUrl, state.hubVersion, id);
+
 					await this.storage.addServerOrUpdate(
 						{
 							id,
@@ -191,6 +207,7 @@ export class JupyterHubUrlCapture {
 						label: state.displayName,
 					};
 				}
+
 				if (nextStep) {
 					// If nextStep is something that we have already executed in the past
 					// then this means we're actually going back to that step.
@@ -200,16 +217,20 @@ export class JupyterHubUrlCapture {
 
 						continue;
 					}
+
 					if (step.canNavigateBackToThis) {
 						stepsExecuted.push(step.step);
 					}
+
 					continue;
 				}
+
 				if (stepsExecuted.length) {
 					nextStep = stepsExecuted.pop();
 
 					continue;
 				}
+
 				sendJupyterHubUrlNotAdded("cancel", step.step);
 
 				return;
@@ -219,8 +240,10 @@ export class JupyterHubUrlCapture {
 				sendJupyterHubUrlNotAdded("cancel", "");
 			} else {
 				traceError("Failed to capture remote jupyter server", ex);
+
 				sendJupyterHubUrlNotAdded("error", "");
 			}
+
 			throw ex;
 		} finally {
 			dispose(disposables);
@@ -245,38 +268,54 @@ interface MultiStep<T, State> {
 	 * Meaning, this step should be skipped in the future.
 	 */
 	disabled?: boolean;
+
 	canNavigateBackToThis: boolean;
+
 	dispose(): void;
+
 	run(state: State, token: CancellationToken): Promise<T | undefined>;
 }
 type State = {
 	displayNamesOfHandles: Map<string, string>;
+
 	urlWasPrePopulated: boolean;
+
 	serverId: string;
 	/**
 	 * Name of the server to start (named jupyter hub servers).
 	 */
 	serverName: string | undefined;
+
 	errorMessage: string;
+
 	url: string;
+
 	displayName: string;
+
 	baseUrl: string;
+
 	hubVersion: string;
+
 	auth: {
 		username: string;
+
 		password: string;
+
 		token: string;
+
 		tokenId: string;
 	};
 };
 
 class GetUrlStep extends DisposableStore implements MultiStep<Step, State> {
 	step: Step = "Get Url";
+
 	canNavigateBackToThis = true;
 
 	constructor(private readonly fetch: SimpleFetch) {
 		super();
 	}
+
 	async run(state: State, token: CancellationToken) {
 		if (!state.url) {
 			try {
@@ -298,7 +337,9 @@ class GetUrlStep extends DisposableStore implements MultiStep<Step, State> {
 				// We can ignore errors.
 			}
 		}
+
 		const validationMessage = state.errorMessage;
+
 		state.errorMessage = "";
 
 		const url = await this.add(new WorkflowInputCapture()).getValue(
@@ -313,6 +354,7 @@ class GetUrlStep extends DisposableStore implements MultiStep<Step, State> {
 					if (!isValidUrl(value)) {
 						return Localized.jupyterSelectURIInvalidURI;
 					}
+
 					try {
 						await getJupyterHubBaseUrl(value, this.fetch, token);
 					} catch (ex) {
@@ -331,11 +373,16 @@ class GetUrlStep extends DisposableStore implements MultiStep<Step, State> {
 		if (!url) {
 			return;
 		}
+
 		state.url = url;
+
 		state.baseUrl = await getJupyterHubBaseUrl(url, this.fetch, token);
+
 		state.hubVersion = await getVersion(state.baseUrl, this.fetch, token);
+
 		state.auth.username =
 			state.auth.username || extractUserNameFromUrl(url) || "";
+
 		state.auth.token = state.auth.token || extractTokenFromUrl(url) || "";
 
 		return "Get Username";
@@ -343,10 +390,12 @@ class GetUrlStep extends DisposableStore implements MultiStep<Step, State> {
 }
 class GetUserName extends DisposableStore implements MultiStep<Step, State> {
 	step: Step = "Get Username";
+
 	canNavigateBackToThis = true;
 
 	async run(state: State, token: CancellationToken) {
 		const errorMessage = state.errorMessage;
+
 		state.errorMessage = ""; // Never display this validation message again.
 		const username = await this.add(new WorkflowInputCapture()).getValue(
 			{
@@ -363,6 +412,7 @@ class GetUserName extends DisposableStore implements MultiStep<Step, State> {
 		if (!username) {
 			return;
 		}
+
 		state.auth.username = username;
 
 		return "Get Password";
@@ -370,6 +420,7 @@ class GetUserName extends DisposableStore implements MultiStep<Step, State> {
 }
 class GetPassword extends DisposableStore implements MultiStep<Step, State> {
 	step: Step = "Get Password";
+
 	canNavigateBackToThis = true;
 
 	constructor(private readonly authenticator: IAuthenticator) {
@@ -413,6 +464,7 @@ class GetPassword extends DisposableStore implements MultiStep<Step, State> {
 					if (!value) {
 						return Localized.emptyPasswordErrorMessage;
 					}
+
 					try {
 						state.auth.password = value;
 
@@ -424,8 +476,11 @@ class GetPassword extends DisposableStore implements MultiStep<Step, State> {
 								},
 								token,
 							);
+
 						state.auth.token = result.token || "";
+
 						state.auth.tokenId = result.tokenId || "";
+
 						traceDebug(
 							`Got an Auth token = ${state.auth.token.length} && ${
 								state.auth.token.trim().length
@@ -461,6 +516,7 @@ class GetPassword extends DisposableStore implements MultiStep<Step, State> {
 		if (!password) {
 			return;
 		}
+
 		state.auth.password = password;
 
 		return "Verify Connection";
@@ -472,6 +528,7 @@ class VerifyConnection
 	implements MultiStep<Step, State>
 {
 	step: Step = "Verify Connection";
+
 	canNavigateBackToThis = false;
 
 	constructor(
@@ -480,6 +537,7 @@ class VerifyConnection
 	) {
 		super();
 	}
+
 	async run(
 		state: State,
 		token: CancellationToken,
@@ -512,6 +570,7 @@ class VerifyConnection
 				return "Get Username";
 			}
 		}
+
 		return "Server Selector";
 	}
 }
@@ -530,12 +589,15 @@ function getServerStatus(server: ApiTypes.ServerInfo) {
 }
 class ServerSelector extends DisposableStore implements MultiStep<Step, State> {
 	step: Step = "Server Selector";
+
 	disabled?: boolean | undefined;
+
 	canNavigateBackToThis = false;
 
 	constructor(private readonly fetch: SimpleFetch) {
 		super();
 	}
+
 	async run(
 		state: State,
 		token: CancellationToken,
@@ -554,6 +616,7 @@ class ServerSelector extends DisposableStore implements MultiStep<Step, State> {
 				(servers.length === 1 && !servers[0].name)
 			) {
 				traceDebug("No servers found for the user");
+
 				this.disabled = true;
 
 				return "Get Display Name";
@@ -580,27 +643,33 @@ class ServerSelector extends DisposableStore implements MultiStep<Step, State> {
 			if (!selection) {
 				return;
 			}
+
 			state.serverName = selection.server.name;
 		} catch (err) {
 			if (err instanceof CancellationError) {
 				throw err;
 			}
+
 			this.disabled = true;
+
 			traceWarn(
 				"Failed to list all of the servers for the user, assuming there aren't any",
 				err,
 			);
 		}
+
 		return "Get Display Name";
 	}
 }
 class GetDisplayName extends DisposableStore implements MultiStep<Step, State> {
 	step: Step = "Get Display Name";
+
 	canNavigateBackToThis = false;
 
 	constructor(private readonly storage: JupyterHubServerStorage) {
 		super();
 	}
+
 	async run(
 		state: State,
 		token: CancellationToken,
@@ -622,6 +691,7 @@ class GetDisplayName extends DisposableStore implements MultiStep<Step, State> {
 		if (!displayName) {
 			return;
 		}
+
 		state.displayName = displayName;
 
 		return "After";
@@ -634,18 +704,22 @@ export function getSuggestedDisplayName(
 	usedNames: string[],
 ) {
 	const usedNamesSet = new Set(usedNames.map((s) => s.toLowerCase()));
+
 	usedNamesSet.add("localhost");
+
 	usedNamesSet.add("");
 
 	const isIPAddress =
 		typeof parseInt(new URL(baseUrl).hostname.charAt(0), 10) === "number";
 
 	let hostName = isIPAddress ? "JupyterHub" : new URL(baseUrl).hostname;
+
 	hostName = serverName ? `${hostName} (${serverName})` : hostName;
 
 	if (!isIPAddress && !usedNamesSet.has(hostName.toLowerCase())) {
 		return hostName;
 	}
+
 	for (let i = 0; i < 10; i++) {
 		const name = i === 0 ? hostName : `${hostName} ${i}`;
 
@@ -653,6 +727,7 @@ export function getSuggestedDisplayName(
 			return name;
 		}
 	}
+
 	return "JupyterHub";
 }
 

@@ -52,6 +52,7 @@ export class SimpleFetch {
 
 				if (value === Localized.jupyterSelfCertEnable) {
 					solveCertificateProblem("self-signed", "allow");
+
 					await workspace
 						.getConfiguration("jupyter")
 						.updateSetting(
@@ -69,6 +70,7 @@ export class SimpleFetch {
 					solveCertificateProblem("self-signed", "cancel");
 				}
 			}
+
 			throw e;
 		}
 	}

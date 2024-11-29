@@ -6,9 +6,11 @@
  */
 export class StopWatch {
 	private started = Date.now();
+
 	public get elapsed() {
 		return Date.now() - this.started;
 	}
+
 	public reset() {
 		this.started = Date.now();
 	}
